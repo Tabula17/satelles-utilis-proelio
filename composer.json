@@ -30,11 +30,12 @@
     "php": ">=8.2"
   },
   "require-dev": {
-    "php-amqplib/php-amqplib": "^v3.7.3",
-    "ext-redis": "*"
+    "php-amqplib/php-amqplib": "^v3.7.3"
   },
   "suggest": {
     "php-amqplib/php-amqplib": "Para el uso de la cola de tareas AMQP",
-    "ext-redis": "Para el uso de la cola de tareas REDIS"
+    "ext-redis": "Para el uso de la cola de tareas REDIS",
+    "ext-openssl": "Para el uso de la seguridad TLS en las conexiones",
+    "ext-swoole": "Para el uso de componentes asincrónicos y de red"
   }
 }

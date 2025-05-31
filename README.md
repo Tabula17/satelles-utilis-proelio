@@ -61,6 +61,43 @@ $queue = new RabbitMQQueue($config);
 // El uso es similar al de RedisQueue
 ```
 
+### Middleware mTLS (TCP)
+
+Implementa autenticación mutual TLS (mTLS) para servidores TCP Swoole. Permite gestionar conexiones seguras basadas en certificados X.509.
+
+Ejemplo de uso:
+
+```php
+$middleware = new TCPmTLSAuthMiddleware();
+
+// Agregar clientes autorizados por su Common Name
+$middleware->allowClient('client1.example.com');
+$middleware->allowClient('client2.example.com');
+
+// Configurar el servidor Swoole con TLS
+$server->set([
+    'ssl_cert_file' => '/path/to/server.crt',
+    'ssl_key_file' => '/path/to/server.key',
+    'ssl_ca_file' => '/path/to/ca.crt',
+    'ssl_verify_peer' => true,
+    'ssl_client_cert_file' => true,
+]);
+
+// Manejar conexiones entrantes
+$server->on('receive', function (Server $server, int $fd, int $reactorId, string $data) use ($middleware) {
+    $middleware->handle($server, $fd, $data, function ($server, $context) {
+        // El cliente está autenticado, procesar la petición
+        $server->send($context['fd'], "Bienvenido " . $context['client_cn']);
+    });
+});
+```
+
+Características del middleware mTLS:
+- Validación de certificados de cliente
+- Gestión de lista blanca de Common Names
+- Rechazo automático de conexiones no autorizadas
+- Contexto enriquecido con información del certificado
+
 ## Por Implementar
 
 - Sistema de Caché
@@ -77,6 +114,7 @@ $queue = new RabbitMQQueue($config);
 - Extensiones según el componente:
   - Redis: `ext-redis`
   - RabbitMQ: `php-amqplib/php-amqplib`
+  - mTLS: `ext-openssl`, `ext-swoole`
 
 ## Licencia
 
