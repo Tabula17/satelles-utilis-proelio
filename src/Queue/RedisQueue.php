@@ -15,17 +15,20 @@ class RedisQueue implements QueueInterface
     /**
      * Constructor.
      *
-     * @param array $config Configuración de conexión a Redis
+     * @param string $host
+     * @param string $port
+     * @param string|null $channel
+     * @param float $timeout
      */
-    public function __construct(array $config)
+    public function __construct(string $host, string $port, ?string $channel = null, float $timeout = 2.5)
     {
         $this->redis = new Redis();
         $this->redis->connect(
-            $config['host'],
-            $config['port'],
-            2.5 // timeout
+            $host,
+            $port,
+            $timeout// timeout
         );
-        $this->channel = ($config['channel'] ?? 'default') . ':';
+        $this->channel = ($channel ?? 'default') . ':';
         $this->redis->setOption(Redis::OPT_PREFIX, $this->channel);
     }
 
