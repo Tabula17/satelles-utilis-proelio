@@ -16,11 +16,11 @@ class RedisQueue implements QueueInterface
      * Constructor.
      *
      * @param string $host
-     * @param string $port
+     * @param int $port
      * @param string|null $channel
      * @param float $timeout
      */
-    public function __construct(string $host, string $port, ?string $channel = null, float $timeout = 2.5)
+    public function __construct(string $host, int $port, ?string $channel = null, float $timeout = 2.5)
     {
         $this->redis = new Redis();
         $this->redis->connect(
