@@ -1,0 +1,34 @@
+{
+  "name": "vendor_name/satelles-utilis-proelio",
+  "description": "description",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Martín Panizzo",
+      "email": "code.tabula17@gmail.com.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Tabula17\\Satelles\\Utilis\\": "src/"
+    }
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://tabula17.repo.repman.io"
+    }
+  ],
+  "require": {
+    "php": ">=8.2"
+  },
+  "require-dev": {
+    "php-amqplib/php-amqplib": "^v3.7.3",
+    "ext-redis": "*"
+  },
+  "suggest": {
+    "php-amqplib/php-amqplib": "Para el uso de la cola de tareas AMQP",
+    "ext-redis": "Para el uso de la cola de tareas REDIS"
+  }
+}
