@@ -5,7 +5,7 @@ Biblioteca de utilidades PHP para proyectos Tabula17. Proporciona componentes re
 ## Instalación
 
 ```bash
-composer require tabula17/satelles-utilis-proelio
+composer require xvii/satelles-utilis-proelio
 ```
 
 ## Componentes
