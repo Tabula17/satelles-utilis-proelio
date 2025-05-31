@@ -9,6 +9,12 @@
       "email": "code.tabula17@gmail.com.com"
     }
   ],
+  "extra": {
+    "branch-alias": {
+      "dev-main": "1.0.x-dev"
+    }
+  },
+  "homepage": "https://github.com/Tabula17/satelles-utilis-proelio",
   "autoload": {
     "psr-4": {
       "Tabula17\\Satelles\\Utilis\\": "src/"
