@@ -123,12 +123,13 @@ Implementa un cliente para el protocolo IPP (Internet Printing Protocol) que per
 Permite enviar trabajos de impresión y gestionar impresoras de red.
 
 #### Nota importante:
-1. El servidor CUPS debe estar configurado para aceptar conexiones remotas si no estás trabajando en localhost.
+1. El servidor CUPS debe estar configurado para aceptar conexiones remotas si no estás trabajando en localhost. 
+Para ello, asegúrate de que el archivo de configuración `/etc/cups/cupsd.conf` permita conexiones desde tu IP o dominio.
 2. El protocolo IPP (Internet Printing Protocol) es complejo y esta clase solo implementa una parte.
 3. Swoole es necesario para manejar las conexiones de red de manera eficiente.
 
-Ejemplo de uso:
 
+Ejemplo de uso:
 ```php
 // Crear cliente CUPS
 $client = new CupsClient('localhost', 631);
@@ -147,6 +148,35 @@ $printers = $client->getPrinters();
 // Cerrar conexión cuando termine
 $client->disconnect();
 ```
+Si al intentar obtener la lista de impresoras disponibles recibes un error de autenticación, asegúrate de que el servidor CUPS esté configurado para permitir conexiones sin autenticación o proporciona las credenciales necesarias.
+
+- Para utilizar CUPS con autenticación, puedes pasar las credenciales en el constructor o usar el método `setCredentials` del cliente CUPS:
+```php
+$client = new CupsClient(
+    host:'localhost', 
+    port:631,
+    username:'usuario',
+    password:'contraseña'
+   );
+// o mediante setCredentials
+$client->setCredentials('usuario', 'contraseña');
+```
+- Para modificar la configuración de CUPS en `/etc/cups/cupsd.conf` y permitir operaciones administrativas:
+```conf
+# Permitir acceso a la API desde localhost
+<Location />
+  Allow from localhost
+  Order deny,allow
+</Location>
+
+# Permitir operaciones administrativas
+<Location /admin>
+  Allow from localhost
+  Order deny,allow
+</Location>
+```
+Para más detalles sobre la configuración de CUPS, consulta la [documentación oficial de CUPS](https://www.cups.org/doc/).
+
 Características del cliente CUPS:
 - Soporte completo del protocolo IPP 1.1
 - Gestión automática de conexiones

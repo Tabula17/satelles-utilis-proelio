@@ -2,16 +2,23 @@
 
 namespace Tabula17\Satelles\Utilis\Print;
 
+use Exception;
 use Random\RandomException;
 use Swoole\Coroutine\Http\Client;
 use Tabula17\Satelles\Utilis\Exception\InvalidArgumentException;
 use Tabula17\Satelles\Utilis\Exception\RuntimeException;
 
+/**
+ * @property string|null $username
+ */
 class CupsClient
 {
     private string $host;
     private int $port;
     private Client $client;
+    private ?string $password;
+    private ?string $username;
+
     /**
      * Constructor de la clase CupsClient
      * Inicializa el cliente HTTP para conectarse al servidor CUPS.
@@ -21,10 +28,14 @@ class CupsClient
      * @param int $port Puerto del servidor CUPS (por defecto 631)
      * @param float $timeout Tiempo de espera para la conexión (por defecto 5.0 segundos)
      */
-    public function __construct(string $host = 'localhost', int $port = 631, float $timeout = 5.0)
+    public function __construct(string $host = 'localhost', int $port = 631, float $timeout = 5.0,
+                                ?string $username = null,
+                                ?string $password = null)
     {
         $this->host = $host;
         $this->port = $port;
+        $this->username = $username;
+        $this->password = $password;
 
 
         // Inicializamos el cliente pero no conectamos aún
@@ -36,6 +47,29 @@ class CupsClient
                 'Accept' => 'application/ipp'
             ]
         ]);
+        // Configurar autenticación básica si hay credenciales
+        if ($this->username && $this->password) {
+            $this->client->setHeaders([
+                'Authorization' => 'Basic ' . base64_encode("{$this->username}:{$this->password}")
+            ]);
+        }
+    }
+
+    public function setCredentials(string $username, string $password): void
+    {
+        $this->username = $username;
+        $this->password = $password;
+        // Actualizar las cabeceras del cliente
+        if ($this->username && $this->password) {
+            $this->client->setHeaders([
+                'Authorization' => 'Basic ' . base64_encode("{$this->username}:{$this->password}")
+            ]);
+        } else {
+            // Si no hay credenciales, eliminar la cabecera de autorización
+            $this->client->setHeaders([
+                'Authorization' => null
+            ]);
+        }
     }
 
     /**
@@ -94,6 +128,8 @@ class CupsClient
      * Obtiene información sobre las impresoras disponibles
      *
      * @return array Lista de impresoras con sus atributos
+     * @throws InvalidArgumentException
+     * @throws RandomException
      * @throws RuntimeException Si hay un error al obtener la información
      */
     public function getPrinters(): array
@@ -101,12 +137,37 @@ class CupsClient
         $ippRequest = $this->buildIppRequest('get-printers');
 
         $this->client->post('/', $ippRequest);
+        // Si recibimos 401 (Unauthorized), intentamos con autenticación
+        if ($this->client->statusCode === 401 && $this->username && $this->password) {
+            // Reintentar con autenticación
+            $this->client->setHeaders([
+                'Authorization' => 'Basic ' . base64_encode("{$this->username}:{$this->password}")
+            ]);
+            $this->client->post('/', $ippRequest);
+        }
 
         if ($this->client->statusCode !== 200) {
             throw new RuntimeException("Error al obtener impresoras: " . ($this->client->body ?: 'Código de estado ' . $this->client->statusCode));
         }
 
         return $this->parseIppResponse($this->client->body);
+    }
+    public function getPrintersViaSystem(): array
+    {
+        $output = shell_exec('lpstat -a 2>&1');
+
+        if (strpos($output, 'accepting requests') === false) {
+            throw new RuntimeException("No se pudo obtener la lista de impresoras: $output");
+        }
+
+        $printers = [];
+        foreach (explode("\n", trim($output)) as $line) {
+            if (preg_match('/^([^\s]+)\s/', $line, $matches)) {
+                $printers[] = $matches[1];
+            }
+        }
+
+        return $printers;
     }
 
     /**
@@ -337,6 +398,100 @@ class CupsClient
                 return $value; // Valor desconocido, devolver como está
         }
     }
+
+    /**
+     * Obtiene la versión del servidor CUPS
+     * @return string
+     * @throws RuntimeException
+     */
+    public function getVersion(): string
+    {
+        try {
+            // Intentar obtener la versión mediante IPP
+            return $this->getVersionIpp();
+        } catch (RuntimeException $e) {
+
+            try {
+                // Si falla, intentar obtenerla por HTTP
+                return $this->getVersionHttp();
+            } catch (RuntimeException $e) {
+                // Si falla en ambos casos, lanzar la excepción
+                throw new RuntimeException("Error al obtener la versión de CUPS: " . $e->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Obtiene la versión del servidor CUPS mediante IPP
+     *
+     * @return string Versión de CUPS (ej: "2.3.1")
+     * @throws RuntimeException Si no se puede obtener la versión
+     */
+    public function getVersionIpp(): string
+    {
+        try {
+            $ippRequest = $this->buildIppRequest('get-version');
+            $this->client->post('/admin/', $ippRequest);
+
+            if ($this->client->statusCode !== 200) {
+                throw new RuntimeException("Error al obtener versión: HTTP {$this->client->statusCode}");
+            }
+
+            $response = $this->parseIppResponse($this->client->body);
+
+            // Buscar el atributo que contiene la versión
+            foreach ($response['attributes'] as $group) {
+                if (isset($group['printer-version'])) {
+                    $version = $group['printer-version'];
+                    return $this->formatIppVersion($version);
+                }
+            }
+
+            throw new RuntimeException("No se encontró la versión en la respuesta");
+        } catch (Exception $e) {
+            throw new RuntimeException("Error al obtener versión CUPS: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Obtiene la versión de CUPS mediante el endpoint HTTP
+     *
+     * @return string Versión de CUPS
+     * @throws RuntimeException Si no se puede obtener la versión
+     */
+    public function getVersionHttp(): string
+    {
+        try {
+            $this->client->get('/');
+
+            if ($this->client->statusCode !== 200) {
+                throw new RuntimeException("Error al obtener versión: HTTP {$this->client->statusCode}");
+            }
+
+            // Buscar en las cabeceras o en el body
+            if (preg_match('/CUPS\/([\d.]+)/i', $this->client->body, $matches)) {
+                return $matches[1];
+            }
+
+            throw new RuntimeException("No se encontró la versión en la respuesta HTTP");
+        } catch (Exception $e) {
+            throw new RuntimeException("Error al obtener versión CUPS via HTTP: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Formatea la versión IPP (16 bits) a versión legible
+     * Ej: 0x020301 → "2.3.1"
+     */
+    private function formatIppVersion(int $ippVersion): string
+    {
+        $major = ($ippVersion >> 16) & 0xFF;
+        $minor = ($ippVersion >> 8) & 0xFF;
+        $patch = $ippVersion & 0xFF;
+
+        return "$major.$minor.$patch";
+    }
+
     /**
      * Destructor de la clase CupsClient
      * Cierra la conexión al servidor CUPS al destruir el objeto.
