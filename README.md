@@ -116,6 +116,45 @@ Características del middleware mTLS:
 - Rechazo automático de conexiones no autorizadas
 - Contexto enriquecido con información del certificado
 
+
+### Cliente CUPS (IPP)
+
+Implementa un cliente para el protocolo IPP (Internet Printing Protocol) que permite interactuar con servidores CUPS. 
+Permite enviar trabajos de impresión y gestionar impresoras de red.
+
+#### Nota importante:
+1. El servidor CUPS debe estar configurado para aceptar conexiones remotas si no estás trabajando en localhost.
+2. El protocolo IPP (Internet Printing Protocol) es complejo y esta clase solo implementa una parte.
+3. Swoole es necesario para manejar las conexiones de red de manera eficiente.
+
+Ejemplo de uso:
+
+```php
+// Crear cliente CUPS
+$client = new CupsClient('localhost', 631);
+
+// Enviar trabajo de impresión
+$response = $client->printJob(
+    'mi-impresora',
+    $datos,
+    'Documento importante',
+    ['copies' => 2]
+);
+
+// Listar impresoras disponibles
+$printers = $client->getPrinters();
+
+// Cerrar conexión cuando termine
+$client->disconnect();
+```
+Características del cliente CUPS:
+- Soporte completo del protocolo IPP 1.1
+- Gestión automática de conexiones
+- Envío de trabajos de impresión
+- Consulta de impresoras disponibles
+- Manejo de atributos y opciones de impresión
+- Parsing completo de respuestas IPP
+
 ## Por Implementar
 
 - Sistema de Caché
@@ -133,6 +172,7 @@ Características del middleware mTLS:
   - Redis: `ext-redis`
   - RabbitMQ: `php-amqplib/php-amqplib`
   - mTLS: `ext-openssl`, `ext-swoole`
+  - CUPS: `ext-swoole`
 
 ## Contribuir
 
