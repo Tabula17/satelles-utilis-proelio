@@ -10,6 +10,7 @@ use Tabula17\Satelles\Utilis\Exception\RuntimeException;
 
 /**
  * @property string|null $username
+ * @property float $timeout
  */
 class CupsClient
 {
@@ -18,6 +19,7 @@ class CupsClient
     private Client $client;
     private ?string $password;
     private ?string $username;
+    private float $timeout;
 
     /**
      * Constructor de la clase CupsClient
@@ -28,12 +30,13 @@ class CupsClient
      * @param int $port Puerto del servidor CUPS (por defecto 631)
      * @param float $timeout Tiempo de espera para la conexión (por defecto 5.0 segundos)
      */
-    public function __construct(string $host = 'localhost', int $port = 631, float $timeout = 5.0,
+    public function __construct(string  $host = 'localhost', int $port = 631, float $timeout = 5.0,
                                 ?string $username = null,
                                 ?string $password = null)
     {
         $this->host = $host;
         $this->port = $port;
+        $this->timeout = $timeout;
         $this->username = $username;
         $this->password = $password;
 
@@ -49,10 +52,18 @@ class CupsClient
         ]);
         // Configurar autenticación básica si hay credenciales
         if ($this->username && $this->password) {
-            $this->client->setHeaders([
-                'Authorization' => 'Basic ' . base64_encode("{$this->username}:{$this->password}")
-            ]);
+            $this->setCredentials($this->username, $this->password);
         }
+
+    }
+    public function debugAuth(): void
+    {
+        $this->client->get('/admin');
+        echo "Status: {$this->client->statusCode}\n";
+        echo "Headers:\n";
+        print_r($this->client->headers);
+        echo "Body:\n";
+        echo substr($this->client->body, 0, 500); // Primeros 500 caracteres
     }
 
     public function setCredentials(string $username, string $password): void
@@ -61,8 +72,10 @@ class CupsClient
         $this->password = $password;
         // Actualizar las cabeceras del cliente
         if ($this->username && $this->password) {
+            $authString = base64_encode("{$this->username}:{$this->password}");
             $this->client->setHeaders([
-                'Authorization' => 'Basic ' . base64_encode("{$this->username}:{$this->password}")
+                'Authorization' => "Basic $authString",
+                'Cookie' => $this->getAuthCookie() // Intenta con cookie si Basic Auth falla
             ]);
         } else {
             // Si no hay credenciales, eliminar la cabecera de autorización
@@ -70,6 +83,34 @@ class CupsClient
                 'Authorization' => null
             ]);
         }
+    }
+
+    /**
+     * Obtiene cookie de autenticación mediante solicitud previa
+     */
+    private function getAuthCookie(): string
+    {
+        $tempClient = new Client($this->host, $this->port);
+        $tempClient->set([
+            'timeout' => $this->timeout,
+            'headers' => [
+                'Authorization' => 'Basic ' . base64_encode("{$this->username}:{$this->password}"),
+                'Content-Type' => 'application/x-www-form-urlencoded'
+            ]
+        ]);
+
+        // Simulamos login como lo hace la interfaz web
+        $tempClient->post('/admin', [
+            'org.cups.sid' => '1',
+            'OP' => 'login',
+            'USERID' => $this->username,
+            'PASSWD' => $this->password
+        ]);
+
+        $cookie = $tempClient->set_cookie_headers['org.cups.sid'] ?? '';
+        $tempClient->close();
+
+        return $cookie;
     }
 
     /**
@@ -140,18 +181,18 @@ class CupsClient
         // Si recibimos 401 (Unauthorized), intentamos con autenticación
         if ($this->client->statusCode === 401 && $this->username && $this->password) {
             // Reintentar con autenticación
-            $this->client->setHeaders([
-                'Authorization' => 'Basic ' . base64_encode("{$this->username}:{$this->password}")
-            ]);
+            $this->setCredentials($this->username, $this->password);
             $this->client->post('/', $ippRequest);
         }
 
         if ($this->client->statusCode !== 200) {
+            $this->debugAuth();
             throw new RuntimeException("Error al obtener impresoras: " . ($this->client->body ?: 'Código de estado ' . $this->client->statusCode));
         }
 
         return $this->parseIppResponse($this->client->body);
     }
+
     public function getPrintersViaSystem(): array
     {
         $output = shell_exec('lpstat -a 2>&1');
