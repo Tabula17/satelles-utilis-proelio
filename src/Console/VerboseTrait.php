@@ -32,6 +32,7 @@ trait VerboseTrait
 
 
     private string $verboseIcon = '🛰️';
+    private ?string $verboseContext = null;
 
     /**
      * Formats a message for console output with a timestamp and class name.
@@ -42,7 +43,8 @@ trait VerboseTrait
      */
     private function formatConsoleMessage(string|\Stringable $message, array $context = []): string
     {
-        $formatted = date('[Y-m-d H:i:s]') . " [" . str_replace(__NAMESPACE__ . '\\', '', __CLASS__) . "] " . $message;
+        $contextLog = $this->verboseContext ?? str_replace(__NAMESPACE__ . '\\', '', __CLASS__);
+        $formatted = " [" .$contextLog . "] " .date('[Y-m-d H:i:s]') . " " . $message;
         if (!empty($context)) {
             $formatted .= ' ' . json_encode($context);
         }

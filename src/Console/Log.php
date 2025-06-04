@@ -9,15 +9,15 @@ class Log implements LoggerInterface
 
     use VerboseTrait {
         isVerbose as private;
-        log as public log;
-        notice as public notice;
-        warning as public warning;
-        error as public error;
-        critical as public critical;
-        alert as public alert;
-        emergency as public emergency;
-        debug as public debug;
-        info as public info;
+        log as public ;
+        notice as public ;
+        warning as public ;
+        error as public ;
+        critical as public ;
+        alert as public ;
+        emergency as public ;
+        debug as public ;
+        info as public ;
 
     }
 
