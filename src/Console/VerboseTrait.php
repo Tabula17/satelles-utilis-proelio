@@ -16,11 +16,11 @@ trait VerboseTrait
     /**
      * Formats a message for console output with a timestamp and class name.
      *
-     * @param string $message The message to format.
+     * @param string|\Stringable $message The message to format.
      * @param array $context Additional context to include in the message.
      * @return string The formatted message.
      */
-    private function formatConsoleMessage(string $message, array $context = []): string
+    private function formatConsoleMessage(string|\Stringable $message, array $context = []): string
     {
         $formatted = date('[Y-m-d H:i:s]') . " [" . str_replace(__NAMESPACE__ . '\\', '', __CLASS__) . "] " . $message;
         if (!empty($context)) {
@@ -32,10 +32,10 @@ trait VerboseTrait
     /**
      * Outputs a message to the console if verbose mode is enabled.
      *
-     * @param string $message The message to output.
+     * @param string|\Stringable $message The message to output.
      * @param array $context Additional context to include in the message.
      */
-    private function log(int $level, string $message, array $context = []): void
+    private function log(int $level, string|\Stringable $message, array $context = []): void
     {
         $levels = ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'];
         if ($this->isVerbose($level)) {
@@ -51,42 +51,42 @@ trait VerboseTrait
         }
     }
 
-    private function debug(string $message, array $context = []): void
+    private function debug(string|\Stringable $message, array $context = []): void
     {
         $this->log(0, $message, $context);
     }
 
-    private function info(string $message, array $context = []): void
+    private function info(string|\Stringable $message, array $context = []): void
     {
         $this->log(1, $message, $context);
     }
 
-    private function notice(string $message, array $context = []): void
+    private function notice(string|\Stringable $message, array $context = []): void
     {
         $this->log(2, $message, $context);
     }
 
-    private function warning(string $message, array $context = []): void
+    private function warning(string|\Stringable $message, array $context = []): void
     {
         $this->log(3, $message, $context);
     }
 
-    private function error(string $message, array $context = []): void
+    private function error(string|\Stringable $message, array $context = []): void
     {
         $this->log(4, $message, $context);
     }
 
-    private function critical(string $message, array $context = []): void
+    private function critical(string|\Stringable $message, array $context = []): void
     {
         $this->log(5, $message, $context);
     }
 
-    private function alert(string $message, array $context = []): void
+    private function alert(string|\Stringable $message, array $context = []): void
     {
         $this->log(6, $message, $context);
     }
 
-    private function emergency(string $message, array $context = []): void
+    private function emergency(string|\Stringable $message, array $context = []): void
     {
         $this->log(7, $message, $context);
     }
