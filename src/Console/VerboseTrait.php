@@ -11,7 +11,7 @@ namespace Tabula17\Satelles\Utilis\Console;
 trait VerboseTrait
 {
 
-    private string $icon = '🛰️';
+    private string $verboseIcon = '🛰️';
 
     /**
      * Formats a message for console output with a timestamp and class name.
@@ -22,7 +22,7 @@ trait VerboseTrait
      */
     private function formatConsoleMessage(string $message, array $context = []): string
     {
-        $formatted = date('[Y-m-d H:i:s]') . $this->icon . " [" . str_replace(__NAMESPACE__ . '\\', '', __CLASS__) . "] " . $message;
+        $formatted = date('[Y-m-d H:i:s]') . " [" . str_replace(__NAMESPACE__ . '\\', '', __CLASS__) . "] " . $message;
         if (!empty($context)) {
             $formatted .= ' ' . json_encode($context);
         }
@@ -35,12 +35,69 @@ trait VerboseTrait
      * @param string $message The message to output.
      * @param array $context Additional context to include in the message.
      */
-    private function console(string $message, array $context = []): void
+    private function log(int $level, string $message, array $context = []): void
     {
-        if ($this->isVerbose()) {
-            echo $this->formatConsoleMessage($message, $context);
+        $levels = ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'];
+        if ($this->isVerbose($level)) {
+            $icon = $this->verboseIcon . match ($levels[$level] ?? 'info') {
+                    'debug' => '🐞',
+                    'notice' => '🔔',
+                    'warning', 'alert' => '⚠️',
+                    'error' => '❌',
+                    'critical', 'emergency' => '🚨',
+                    default => 'ℹ️'
+                };
+            echo $this->formatConsoleMessage("$icon $level: " . $message, $context);
         }
     }
 
-    abstract private function isVerbose(): bool;
+    private function debug(string $message, array $context = []): void
+    {
+        $this->log(0, $message, $context);
+    }
+
+    private function info(string $message, array $context = []): void
+    {
+        $this->log(1, $message, $context);
+    }
+
+    private function notice(string $message, array $context = []): void
+    {
+        $this->log(2, $message, $context);
+    }
+
+    private function warning(string $message, array $context = []): void
+    {
+        $this->log(3, $message, $context);
+    }
+
+    private function error(string $message, array $context = []): void
+    {
+        $this->log(4, $message, $context);
+    }
+
+    private function critical(string $message, array $context = []): void
+    {
+        $this->log(5, $message, $context);
+    }
+
+    private function alert(string $message, array $context = []): void
+    {
+        $this->log(6, $message, $context);
+    }
+
+    private function emergency(string $message, array $context = []): void
+    {
+        $this->log(7, $message, $context);
+    }
+
+    /**
+     * Checks if verbose mode is enabled.
+     *
+     * This method should be implemented in the class using this trait to determine
+     * whether verbose output should be displayed.
+     *
+     * @return bool True if verbose mode is enabled, false otherwise.
+     */
+    abstract private function isVerbose(int $level): bool;
 }
