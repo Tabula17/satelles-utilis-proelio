@@ -6,6 +6,7 @@ use Psr\Log\LoggerInterface;
 
 class Log implements LoggerInterface
 {
+
     use VerboseTrait {
         isVerbose as private;
         log as public log;

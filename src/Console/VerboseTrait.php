@@ -11,6 +11,26 @@ namespace Tabula17\Satelles\Utilis\Console;
 trait VerboseTrait
 {
 
+    public const DEBUG = 100;
+    public const INFO = 200;
+    public const NOTICE = 250;
+    public const WARNING = 300;
+    public const ERROR = 400;
+    public const CRITICAL = 500;
+    public const ALERT = 550;
+    public const EMERGENCY = 600;
+    public const VERBOSE_LEVELS = [
+        self::DEBUG => 'debug',
+        self::INFO => 'info',
+        self::NOTICE => 'notice',
+        self::WARNING => 'warning',
+        self::ERROR => 'error',
+        self::CRITICAL => 'critical',
+        self::ALERT => 'alert',
+        self::EMERGENCY => 'emergency',
+    ];
+
+
     private string $verboseIcon = '🛰️';
 
     /**
@@ -38,9 +58,9 @@ trait VerboseTrait
     private function log(mixed $level, string|\Stringable $message, array $context = []): void
     {
         $level = (int)$level;
-        $levels = ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'];
+
         if ($this->isVerbose($level)) {
-            $icon = $this->verboseIcon . match ($levels[$level] ?? 'info') {
+            $icon = $this->verboseIcon . match (self::VERBOSE_LEVELS[$level] ?? 'info') {
                     'debug' => '🐞',
                     'notice' => '🔔',
                     'warning', 'alert' => '⚠️',
@@ -54,42 +74,42 @@ trait VerboseTrait
 
     private function debug(string|\Stringable $message, array $context = []): void
     {
-        $this->log(0, $message, $context);
+        $this->log(self::DEBUG, $message, $context);
     }
 
     private function info(string|\Stringable $message, array $context = []): void
     {
-        $this->log(1, $message, $context);
+        $this->log(self::INFO, $message, $context);
     }
 
     private function notice(string|\Stringable $message, array $context = []): void
     {
-        $this->log(2, $message, $context);
+        $this->log(self::NOTICE, $message, $context);
     }
 
     private function warning(string|\Stringable $message, array $context = []): void
     {
-        $this->log(3, $message, $context);
+        $this->log(self::WARNING, $message, $context);
     }
 
     private function error(string|\Stringable $message, array $context = []): void
     {
-        $this->log(4, $message, $context);
+        $this->log(self::ERROR, $message, $context);
     }
 
     private function critical(string|\Stringable $message, array $context = []): void
     {
-        $this->log(5, $message, $context);
+        $this->log(self::CRITICAL, $message, $context);
     }
 
     private function alert(string|\Stringable $message, array $context = []): void
     {
-        $this->log(6, $message, $context);
+        $this->log(self::ALERT, $message, $context);
     }
 
     private function emergency(string|\Stringable $message, array $context = []): void
     {
-        $this->log(7, $message, $context);
+        $this->log(self::EMERGENCY, $message, $context);
     }
 
     /**
