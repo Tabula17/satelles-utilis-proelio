@@ -43,8 +43,12 @@ trait VerboseTrait
      */
     private function formatConsoleMessage(string|\Stringable $message, array $context = []): string
     {
-        $contextLog = $this->verboseContext ?? str_replace(__NAMESPACE__ . '\\', '', __CLASS__);
-        $formatted = " [" .$contextLog . "] " .date('[Y-m-d H:i:s]') . " " . $message;
+        $contextLog =[];
+        if(!empty($this->verboseIcon)) {
+            $contextLog[] = $this->verboseIcon;
+        }
+        $contextLog[] = $this->verboseContext ?? str_replace(__NAMESPACE__ . '\\', '', __CLASS__);
+        $formatted = " [".implode(" ", $contextLog)."] " . date('[Y-m-d H:i:s]') . " " . $message;
         if (!empty($context)) {
             $formatted .= ' ' . json_encode($context);
         }
@@ -62,15 +66,15 @@ trait VerboseTrait
         $level = (int)$level;
 
         if ($this->isVerbose($level)) {
-            $icon = $this->verboseIcon . match (self::VERBOSE_LEVELS[$level] ?? 'info') {
-                    'debug' => '🐞',
-                    'notice' => '🔔',
-                    'warning', 'alert' => '⚠️',
-                    'error' => '❌',
-                    'critical', 'emergency' => '🚨',
-                    default => 'ℹ️'
-                };
-            echo $this->formatConsoleMessage("$icon $level: " . $message, $context);
+            $icon = match (self::VERBOSE_LEVELS[$level] ?? 'info') {
+                'debug' => '🐞',
+                'notice' => '🔔',
+                'warning', 'alert' => '⚠️',
+                'error' => '❌',
+                'critical', 'emergency' => '🚨',
+                default => 'ℹ️'
+            };
+            echo $this->formatConsoleMessage("$icon: " . $message, $context);
         }
     }
 
