@@ -46,7 +46,7 @@ trait VerboseTrait
         $icon = $this->verboseIcon??'';
         $contextLog= $this->verboseContext ?? str_replace(__NAMESPACE__ . '\\', '', __CLASS__);
 
-        $formatted = "{$icon}}[{$contextLog}]" . date('[Y-m-d H:i:s]') . " " . $message;
+        $formatted = "{$icon}[{$contextLog}]" . date('[Y-m-d H:i:s]') . " " . $message;
         if (!empty($context)) {
             $formatted .= ' ' . json_encode($context);
         }
