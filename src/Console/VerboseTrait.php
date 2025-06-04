@@ -43,12 +43,10 @@ trait VerboseTrait
      */
     private function formatConsoleMessage(string|\Stringable $message, array $context = []): string
     {
-        $contextLog =[];
-        if(!empty($this->verboseIcon)) {
-            $contextLog[] = $this->verboseIcon;
-        }
-        $contextLog[] = $this->verboseContext ?? str_replace(__NAMESPACE__ . '\\', '', __CLASS__);
-        $formatted = " [".implode(" ", $contextLog)."] " . date('[Y-m-d H:i:s]') . " " . $message;
+        $icon = $this->verboseIcon??'';
+        $contextLog= $this->verboseContext ?? str_replace(__NAMESPACE__ . '\\', '', __CLASS__);
+
+        $formatted = "{$icon}}[{$contextLog}]" . date('[Y-m-d H:i:s]') . " " . $message;
         if (!empty($context)) {
             $formatted .= ' ' . json_encode($context);
         }
