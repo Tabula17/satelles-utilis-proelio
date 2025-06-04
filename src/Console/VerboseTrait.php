@@ -35,8 +35,9 @@ trait VerboseTrait
      * @param string|\Stringable $message The message to output.
      * @param array $context Additional context to include in the message.
      */
-    private function log(int $level, string|\Stringable $message, array $context = []): void
+    private function log(mixed $level, string|\Stringable $message, array $context = []): void
     {
+        $level = (int)$level;
         $levels = ['debug', 'info', 'notice', 'warning', 'error', 'critical', 'alert', 'emergency'];
         if ($this->isVerbose($level)) {
             $icon = $this->verboseIcon . match ($levels[$level] ?? 'info') {
