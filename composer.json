@@ -2,7 +2,7 @@
   "name": "xvii/satelles-utilis-proelio",
   "description": "description",
   "minimum-stability": "stable",
-  "license": "proprietary",
+  "license": "MIT",
   "authors": [
     {
       "name": "Martín Panizzo",
@@ -27,7 +27,7 @@
     }
   ],
   "require": {
-    "php": ">=8.2",
+    "php": ">=8.4",
       "psr/log": "^3.0"
   },
   "require-dev": {
@@ -37,6 +37,7 @@
     "php-amqplib/php-amqplib": "Para el uso de la cola de tareas AMQP",
     "ext-redis": "Para el uso de la cola de tareas REDIS",
     "ext-openssl": "Para el uso de la seguridad TLS en las conexiones",
-    "ext-swoole": "Para el uso de componentes asincrónicos y de red"
+    "ext-swoole": "Para el uso de componentes asincrónicos y de red",
+    "ext-simplexml": "Para manejo de estructuras xml"
   }
 }

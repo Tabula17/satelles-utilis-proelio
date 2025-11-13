@@ -1,74 +1,93 @@
 # XVII: 🛰️ satelles-utilis-proelio
-![PHP Version](https://img.shields.io/badge/PHP-8.2%2B-blue)
+![PHP Version](https://img.shields.io/badge/PHP-8.4%2B-blue)
 ![License](https://img.shields.io/github/license/Tabula17/satelles-utilis-proelio)
 ![Last commit](https://img.shields.io/github/last-commit/Tabula17/satelles-utilis-proelio)
 
-Biblioteca de utilidades PHP para proyectos Tabula17. Proporciona componentes reutilizables y herramientas comunes para facilitar el desarrollo de aplicaciones.
+Reusable PHP utilities for Tabula17 projects. This library provides small, focused components to speed up application development (queues, cache, configuration helpers, printing, middleware, console logging, and collections).
 
-## Instalación
+Note: This repository is a library (no standalone runtime/entry point). It is installed via Composer and used in your own application code.
+
+## Stack
+
+- Language: PHP (>= 8.4 per `composer.json`)
+- Package manager: Composer
+- Autoload: PSR-4 (`Tabula17\Satelles\Utilis\` => `src/`)
+- Key dependencies:
+  - Runtime: `psr/log` (PSR-3 interfaces)
+  - Dev-only: `php-amqplib/php-amqplib` (suggested for RabbitMQ queue)
+- Suggested extensions/packages (optional): `ext-redis`, `ext-openssl`, `ext-swoole`, `ext-simplexml`
+
+## Installation
 
 ```bash
 composer require xvii/satelles-utilis-proelio
 ```
 
-## Componentes
+## Requirements
 
-### Sistema de Colas (Queue)
+- PHP 8.4 or newer
+- Extensions depending on what you use:
+  - Redis cache/queue: `ext-redis`
+  - RabbitMQ queue: `php-amqplib/php-amqplib`
+  - TCP mTLS middleware: `ext-openssl`, `ext-swoole`
+  - CUPS client (IPP/HTTP): likely `ext-swoole` (see TODO below)
 
-Implementa un sistema de colas de tareas con múltiples backends:
+## Usage Overview
 
-- **RedisQueue**: Implementación basada en Redis
-- **RabbitMQQueue**: Implementación basada en RabbitMQ
+Below are minimal examples for the main components currently present in `src/`.
 
-Ejemplo de uso con Redis:
+### Cache: RedisStorage
+
+`Tabula17\Satelles\Utilis\Cache\RedisStorage` implements a simple key/value cache on Redis and uses `Tabula17\Satelles\Utilis\Config\RedisConfig` for connection options.
 
 ```php
-$config = [
-    'host' => 'localhost',
+use Tabula17\Satelles\Utilis\Cache\RedisStorage;
+use Tabula17\Satelles\Utilis\Config\RedisConfig;
+
+$config = new RedisConfig([
+    'host' => '127.0.0.1',
     'port' => 6379,
-    'channel' => 'mi-aplicacion'
-];
-
-$queue = new RedisQueue($config);
-
-// Agregar una tarea
-$taskId = $queue->push([
-    'tipo' => 'enviar-email',
-    'datos' => [
-        'destinatario' => 'usuario@ejemplo.com',
-        'asunto' => 'Prueba'
-    ]
+    // 'auth' => ['user', 'pass'],
+    // 'persistent' => true,
 ]);
 
-// Procesar una tarea
+$cache = new RedisStorage($config, prefix: 'app-cache:');
+$cache->set('user:42:name', 'Ada');
+echo $cache->get('user:42:name');
+```
+
+There is also a `MemcachedStorage` implementation that requires the `memcached` extension. Example is analogous (`get`, `set`, `has`, `delete`, `clear`).
+
+### Queues: RedisQueue and RabbitMQQueue
+
+`Tabula17\Satelles\Utilis\Queue\RedisQueue` provides a very simple queue over Redis lists/hashes.
+
+```php
+use Tabula17\Satelles\Utilis\Queue\RedisQueue;
+
+// Constructor signature: (string $host, int $port, ?string $channel = null, float $timeout = 2.5)
+$queue = new RedisQueue('127.0.0.1', 6379, 'my-app');
+
+$taskId = $queue->push(['type' => 'send-email', 'to' => 'user@example.com']);
 $task = $queue->pop();
-if ($task) {
-    // Procesar la tarea...
-    $queue->ack($task['_task_id']);
+if ($task !== null) {
+    // ... process ...
+    $queue->ack($taskId);
 }
 ```
 
-Ejemplo con RabbitMQ:
+`RabbitMQQueue` exists under `src/Queue/` and requires `php-amqplib/php-amqplib`. See class for exact constructor and usage. TODO: Add a concrete example here once interface is finalized.
 
-```php
-$config = [
-    'host' => 'localhost',
-    'port' => 5672,
-    'user' => 'guest',
-    'password' => 'guest',
-    'queue' => 'mi-cola'
-];
+### TCP mTLS Middleware (Swoole)
 
-$queue = new RabbitMQQueue($config);
+`Tabula17\Satelles\Utilis\Middleware\TCPmTLSAuthMiddleware` helps authorize TCP connections using mutual TLS (mTLS). You will need Swoole and OpenSSL enabled in your runtime.
 
-// El uso es similar al de RedisQueue
-```
+Key features:
+- Client certificate validation
+- Allowlist of client Common Names
+- Enriched connection context
 
-### Middleware mTLS (TCP)
-
-Implementa autenticación mutual TLS (mTLS) para servidores TCP Swoole. Permite gestionar conexiones seguras basadas en certificados X.509.
-
-Ejemplo de uso:
+Basic example:
 
 ```php
 // Configuración del servidor
@@ -109,119 +128,78 @@ $server->on('receive', function (Server $server, int $fd, int $reactorId, string
 
 $server->start();
 ```
+### Printing: CUPS Client (IPP)
 
-Características del middleware mTLS:
-- Validación de certificados de cliente
-- Gestión de lista blanca de Common Names
-- Rechazo automático de conexiones no autorizadas
-- Contexto enriquecido con información del certificado
+`Tabula17\Satelles\Utilis\Print\CupsClient` provides access to CUPS (IPP/HTTP). It can retrieve printer lists, submit jobs, and query version.
 
+Important:
+- Your CUPS server must permit the required operations from your host. See CUPS docs for `cupsd.conf` examples.
+- Authentication may be required by your CUPS setup.
 
-### Cliente CUPS (IPP)
+Basic example:
 
-Implementa un cliente para el protocolo IPP (Internet Printing Protocol) que permite interactuar con servidores CUPS. 
-Permite enviar trabajos de impresión y gestionar impresoras de red.
-
-#### Nota importante:
-1. El servidor CUPS debe estar configurado para aceptar conexiones remotas si no estás trabajando en localhost. 
-Para ello, asegúrate de que el archivo de configuración `/etc/cups/cupsd.conf` permita conexiones desde tu IP o dominio.
-2. El protocolo IPP (Internet Printing Protocol) es complejo y esta clase solo implementa una parte.
-3. Swoole es necesario para manejar las conexiones de red de manera eficiente.
-
-
-Ejemplo de uso:
 ```php
-// Crear cliente CUPS
-$client = new CupsClient('localhost', 631);
+use Tabula17\Satelles\Utilis\Print\CupsClient;
 
-// Enviar trabajo de impresión
-$response = $client->printJob(
-    'mi-impresora',
-    $datos,
-    'Documento importante',
-    ['copies' => 2]
-);
-
-// Listar impresoras disponibles
-$printers = $client->getPrinters();
-
-// Cerrar conexión cuando termine
-$client->disconnect();
+$cups = new CupsClient('localhost', 631);
+$printers = $cups->getPrinters();
+// $cups->printJob('printer-name', $data, 'Document title', ['copies' => 2]);
+$cups->disconnect();
 ```
-Si al intentar obtener la lista de impresoras disponibles recibes un error de autenticación, asegúrate de que el servidor CUPS esté configurado para permitir conexiones sin autenticación o proporciona las credenciales necesarias.
 
-- Para utilizar CUPS con autenticación, puedes pasar las credenciales en el constructor o usar el método `setCredentials` del cliente CUPS:
-```php
-$client = new CupsClient(
-    host:'localhost', 
-    port:631,
-    username:'usuario',
-    password:'contraseña'
-   );
-// o mediante setCredentials
-$client->setCredentials('usuario', 'contraseña');
+
+### Collections and Console
+
+- `Collection\GenericCollection`: base for iterable collections, with `toArray()`, `count()`, and serialization helpers.
+- `Console\Log`: a PSR-3 compatible logger wrapper using an internal `VerboseTrait` (see source). Useful for CLI tools.
+
+## Project Structure
+
 ```
-- Para modificar la configuración de CUPS en `/etc/cups/cupsd.conf` y permitir operaciones administrativas:
-```conf
-# Permitir acceso a la API desde localhost
-<Location />
-  Allow from localhost
-  Order deny,allow
-</Location>
-
-# Permitir operaciones administrativas
-<Location /admin>
-  Allow from localhost
-  Order deny,allow
-</Location>
+.
+├── LICENSE
+├── README.md
+├── composer.json
+├── composer.lock
+├── src
+│   ├── Array/
+│   ├── Cache/
+│   │   ├── CacheManagerInterface.php
+│   │   ├── RedisStorage.php
+│   │   └── MemcachedStorage.php
+│   ├── Collection/
+│   │   └── GenericCollection.php
+│   ├── Config/
+│   │   ├── AbstractDescriptor.php
+│   │   └── RedisConfig.php
+│   ├── Console/
+│   │   └── Log.php
+│   ├── Middleware/
+│   │   └── TCPmTLSAuthMiddleware.php
+│   ├── Print/
+│   │   └── CupsClient.php
+│   └── Queue/
+│       ├── RedisQueue.php
+│       └── RabbitMQQueue.php
+└── vendor/
 ```
-Para más detalles sobre la configuración de CUPS, consulta la [documentación oficial de CUPS](https://www.cups.org/doc/).
 
-Características del cliente CUPS:
-- Soporte completo del protocolo IPP 1.1
-- Gestión automática de conexiones
-- Envío de trabajos de impresión
-- Consulta de impresoras disponibles
-- Manejo de atributos y opciones de impresión
-- Parsing completo de respuestas IPP
+## License
 
-## Por Implementar
+MIT License (see `LICENSE`).
 
-- Sistema de Caché
-- Utilidades de Logging
-- Helpers para manipulación de arrays y strings
-- Validadores comunes
-- Utilidades de fecha y hora
-- Interfaces HTTP comunes
-- Y más...
+## Contributing
 
-## Requisitos
+Contributions are welcome!
 
-- PHP 8.2 o superior
-- Extensiones según el componente:
-  - Redis: `ext-redis`
-  - RabbitMQ: `php-amqplib/php-amqplib`
-  - mTLS: `ext-openssl`, `ext-swoole`
-  - CUPS: `ext-swoole`
+1. Fork the project
+2. Create a feature branch (`git checkout -b feature/my-feature`)
+3. Commit your changes (`git commit -m "feat: add my feature"`)
+4. Push the branch (`git push origin feature/my-feature`)
+5. Open a Pull Request
 
-## Contribuir
+## Support
 
-Las contribuciones son bienvenidas. Por favor:
-
-1. Haz fork del proyecto
-2. Crea una rama para tu funcionalidad (`git checkout -b feature/nueva-funcionalidad`)
-3. Commitea tus cambios (`git commit -am 'Agrega nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
-5. Crea un Pull Request
-
-## Licencia
-
-MIT License
-
-## Soporte
-
-Para reportar problemas o solicitar nuevas características:
-1. Revisa los issues existentes
-2. Abre un nuevo issue con los detalles del problema o sugerencia
+Please open an issue describing bugs or feature requests.
 
 ###### 🌌 Ad astra per codicem
