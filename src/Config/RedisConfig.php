@@ -73,7 +73,15 @@ class RedisConfig extends AbstractDescriptor
     protected(set) int $database = 0;
 
     // See PHP stream options for valid SSL configuration settings.
-    protected(set) ?array $ssl;
+    protected(set) ?array $ssl {
+        set(SSLStreamConfig|array|null $value){
+            if ($value instanceof SSLStreamConfig) {
+                $this->ssl = $value->toArray();
+            } else {
+                $this->ssl = $value;
+            }
+        }
+    }
 
     // Which backoff algorithm to use.  'decorrelated jitter' is
     // likely the best one for most solution, but there are many

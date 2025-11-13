@@ -41,6 +41,13 @@ class RedisStorage implements CacheManagerInterface
         }
     }
 
+    /**
+     * Generates a normalized key string by replacing certain delimiters with colons and ensuring consistency.
+     *
+     * @param string $key The original key to be normalized.
+     *
+     * @return string The normalized key string with delimiters replaced by colons.
+     */
     private function getKey(string $key): string
     {
         $keyPath = explode(':', str_replace(['\\', '/', '.', '|'], ':', $key));
