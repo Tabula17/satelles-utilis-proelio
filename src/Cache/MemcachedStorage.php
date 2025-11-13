@@ -3,7 +3,6 @@
 namespace Tabula17\Satelles\Utilis\Cache;
 
 use Memcached;
-use Tabula17\Satelles\Omnia\Roga\Cache\CacheManagerInterface;
 
 /**
  * MemcachedStorage is a cache storage implementation that uses the Memcached extension

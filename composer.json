@@ -38,6 +38,7 @@
     "ext-redis": "Para el uso de la cola de tareas REDIS",
     "ext-openssl": "Para el uso de la seguridad TLS en las conexiones",
     "ext-swoole": "Para el uso de componentes asincrónicos y de red",
-    "ext-simplexml": "Para manejo de estructuras xml"
+    "ext-simplexml": "Para manejo de estructuras xml",
+    "ext-memcached": "Para el uso de memcached como cache backend"
   }
 }
