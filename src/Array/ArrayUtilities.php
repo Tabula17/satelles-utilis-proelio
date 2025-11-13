@@ -1,6 +1,6 @@
 <?php
 
-namespace Tabula17\Satelles\Utilis\Cache;
+namespace Tabula17\Satelles\Utilis\Array;
 
 use SimpleXMLElement;
 
