@@ -26,9 +26,9 @@ class MemcachedStorage implements CacheManagerInterface
         return $this->memcached->get($key);
     }
 
-    public function set(string $key, mixed $value, $serialize = true): void
+    public function set(string $key, mixed $value, int|null $ttl = null): void
     {
-        $this->memcached->set($key, $value);
+        $this->memcached->set($key, $value, $ttl);
     }
 
     public function has(string $key): bool

@@ -16,8 +16,9 @@ interface CacheManagerInterface
      *
      * @param string $key The key to associate with the given value.
      * @param mixed $value The value to be stored.
+     * @param int|null $ttl The time-to-live (TTL) for the stored value, in seconds.
      */
-    public function set(string $key, mixed $value);
+    public function set(string $key, mixed $value, ?int $ttl = null);
 
     /**
      * Checks if the specified key exists.

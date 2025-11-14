@@ -59,9 +59,9 @@ class RedisStorage implements CacheManagerInterface
         return $this->redis->get($this->getKey($key));
     }
 
-    public function set(string $key, mixed $value): void
+    public function set(string $key, mixed $value, ?int $ttl = null): void
     {
-        $this->redis->set($this->getKey($key), $value);
+        $this->redis->set($this->getKey($key), $value, $ttl);
     }
 
     public function has(string $key): bool|int|Redis
