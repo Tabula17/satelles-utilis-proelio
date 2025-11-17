@@ -134,6 +134,18 @@ class ArrayUtilities
         }
         return $found; // Value not found in this branch
     }
+    public static function pathExisits(array $array, string $path): bool
+    {
+        $keys = explode('.', $path);
+        $current = $array;
+        foreach ($keys as $key) {
+            if (!isset($current[$key])) {
+                return false;
+            }
+            $current = $current[$key];
+        }
+        return true;
+    }
 
     /**
      * Converts a SimpleXMLElement object to an associative array.
