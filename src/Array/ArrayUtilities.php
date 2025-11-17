@@ -94,18 +94,41 @@ class ArrayUtilities
         return false; // Element at the path was not found
     }
 
-    public static function getPathByKey(array $array, string $keyToFind){
+    public static function getArrayPathByKey(array $array, string $keyToFind): ?string
+    {
         $path = $keyToFind;
         foreach ($array as $key => $value) {
             if ($key === $keyToFind) {
                 return $path; // Key found
             }
             if (is_array($value)) {
-                $nestedPath = self::getPathByKey($value, $keyToFind);
+                $nestedPath = self::getArrayPathByKey($value, $keyToFind);
                 return "$path.$nestedPath"; // Key found in a nested array
             }
         }
         return null;
+    }
+    public static function getArrayPathByValue($array, $searchValue, $currentPath = []): int|array|string|null
+    {
+        if (!is_array($array)) {
+            return null; // Not an array, cannot traverse
+        }
+
+        foreach ($array as $key => $value) {
+            $newPath = array_merge($currentPath, [$key]); // Add current key to path
+
+            if ($value === $searchValue) {
+                return $newPath; // Value found, return the path
+            }
+
+            if (is_array($value)) {
+                $foundPath = self::getArrayPathByValue($searchValue, $value, $newPath);
+                if ($foundPath !== null) {
+                    return $foundPath; // Path found in a nested array
+                }
+            }
+        }
+        return null; // Value not found in this branch
     }
 
     /**
