@@ -94,6 +94,20 @@ class ArrayUtilities
         return false; // Element at the path was not found
     }
 
+    public static function getPathByKey(array $array, string $keyToFind){
+        $path = $keyToFind;
+        foreach ($array as $key => $value) {
+            if ($key === $keyToFind) {
+                return $path; // Key found
+            }
+            if (is_array($value)) {
+                $nestedPath = self::getPathByKey($value, $keyToFind);
+                return "$path.$nestedPath"; // Key found in a nested array
+            }
+        }
+        return null;
+    }
+
     /**
      * Converts a SimpleXMLElement object to an associative array.
      */
