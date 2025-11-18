@@ -51,9 +51,9 @@ class ArrayUtilities
     {
         if (is_string($path)) {
             $path = explode('.', $path);
-            if(!is_array($path)){
-                $path = [$path];
-            }
+        }
+        if(!is_array($path)){
+            $path = [$path];
         }
         $current = &$array;
         foreach ($path as $key) {
