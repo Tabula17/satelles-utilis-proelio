@@ -101,7 +101,7 @@ class ArrayUtilities
             if ($key === $searchKey) {
                 $found[] = implode('.', $newPath);
             } else if (is_array($value)) {
-                getArrayPathsByKey($value, $searchKey, $newPath, $strict, $found);
+                self::getArrayPathsByKey($value, $searchKey, $newPath, $strict, $found);
             }
         }
         return $found; // Value not found in this branch
