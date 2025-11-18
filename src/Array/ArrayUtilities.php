@@ -94,32 +94,17 @@ class ArrayUtilities
         return false; // Element at the path was not found
     }
 
-    public static function getArrayPathsByKey(array $array, string $keyToFind): array
+    public static function getArrayPathsByKey(array $array, $searchKey, $currentPath = [], $strict = true, &$found = []): int|array|string|null
     {
-        $found = [];
-        function search($value, $key, &$found = [], $path = ''): void
-        {
-            foreach ($value as $k => $v) {
-                if ($key === $k) {
-                    if (!empty($path)) {
-                        $path .= '.' . $k;
-                    }
-                    $found[] = $path;
-                    $path = '';
-                }
-                if (is_array($v)) {
-                    if (!empty($path)) {
-                        $path .= '.' . $k;
-                    } else {
-                        $path = (string)$k;
-                    }
-                    search($v, $key, $found, $path); // Key found in a nested array
-                    $path = '';
-                }
+        foreach ($array as $key => $value) {
+            $newPath = array_merge($currentPath, [$key]); // Add current key to path
+            if ($key === $searchKey) {
+                $found[] = implode('.', $newPath);
+            } else if (is_array($value)) {
+                getArrayPathsByKey($value, $searchKey, $newPath, $strict, $found);
             }
         }
-        search($array, $keyToFind, $found, '');
-        return $found;
+        return $found; // Value not found in this branch
     }
 
     public static function getArrayPathsByValue(array $array, $searchValue, $currentPath = [], $strict = true, &$found = []): int|array|string|null
