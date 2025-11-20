@@ -6,77 +6,116 @@ use ArrayIterator;
 use IteratorAggregate;
 use JsonException;
 use Traversable;
+use ArrayAccess;
+use JsonSerializable;
 
 /**
- * An abstract base class representing a generic collection.
- * Provides common collection functionality and implements IteratorAggregate
- * to allow iteration over contained elements.
+ * Abstract class representing a generic collection of items.
+ * This class provides common methods to manipulate and access
+ * the data stored within the collection. The class implements
+ * IteratorAggregate for traversable behavior, ArrayAccess for array-like
+ * manipulation, and JsonSerializable for JSON serialization.
  */
-abstract class GenericCollection implements IteratorAggregate
+abstract class GenericCollection implements IteratorAggregate, ArrayAccess, JsonSerializable
 {
-    protected array $values;
+    protected array $values = [];
 
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->values);
     }
 
-    /**
-     * @return array
-     * @throws JsonException
-     */
     public function toArray(): array
     {
-        return json_decode(json_encode($this->values, JSON_THROW_ON_ERROR), true, 512, JSON_THROW_ON_ERROR);
+        $result = [];
+        foreach ($this->values as $key => $value) {
+            if ($value instanceof JsonSerializable) {
+                $result[$key] = $value->jsonSerialize();
+            } elseif (is_object($value) && method_exists($value, 'toArray')) {
+                $result[$key] = $value->toArray();
+            } else {
+                $result[$key] = $value;
+            }
+        }
+        return $result;
     }
 
-    /**
-     * @return int
-     */
+    public function jsonSerialize(): array
+    {
+        return $this->toArray();
+    }
+
     public function count(): int
     {
         return count($this->values);
     }
 
-    /**
-     * @return bool
-     */
     public function isEmpty(): bool
     {
         return empty($this->values);
     }
 
-    /**
-     * Finds and returns the first element in the collection that satisfies the given callback.
-     *
-     * @param callable $callback A callback function used to determine if an element matches the criteria.
-     * @return mixed Returns the first matching element if found, or null if no matching element is found.
-     */
     public function find(callable $callback): mixed
     {
-        return array_values(array_filter($this->values, $callback))[0] ?? null;
+        return array_find($this->values, static fn($value) => $callback($value));
     }
 
-    /**
-     * @return mixed
-     */
+    public function filter(callable $callback): static
+    {
+        $filtered = array_filter($this->values, $callback);
+        return new static(...$filtered);
+    }
+
+    public function map(callable $callback): array
+    {
+        return array_map($callback, $this->values);
+    }
+
+    public function some(callable $callback): bool
+    {
+        return array_any($this->values, static fn($value) => $callback($value));
+    }
+
+    public function every(callable $callback): bool
+    {
+        return array_all($this->values, static fn($value) => $callback($value));
+    }
+
     public function first(): mixed
     {
-        return reset($this->values);
+        return $this->values[array_key_first($this->values)] ?? null;
     }
 
-    /**
-     * @return mixed
-     */
     public function last(): mixed
     {
-        return end($this->values);
+        return $this->values[array_key_last($this->values)] ?? null;
     }
 
-    /**
-     * Serializes the object to an array.
-     * @return array
-     */
+    // ArrayAccess methods
+    public function offsetExists(mixed $offset): bool
+    {
+        return isset($this->values[$offset]);
+    }
+
+    public function offsetGet(mixed $offset): mixed
+    {
+        return $this->values[$offset] ?? null;
+    }
+
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
+        if ($offset === null) {
+            $this->values[] = $value;
+        } else {
+            $this->values[$offset] = $value;
+        }
+    }
+
+    public function offsetUnset(mixed $offset): void
+    {
+        unset($this->values[$offset]);
+    }
+
     public function __serialize(): array
     {
         $definedVars = $this->values;
@@ -91,10 +130,6 @@ abstract class GenericCollection implements IteratorAggregate
         return $data;
     }
 
-    /**
-     * @param array $data The data to unserialize and populate the object with.
-     * @return void
-     */
     public function __unserialize(array $data): void
     {
         $this->values = $data;
