@@ -36,7 +36,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
 
     public function offsetExists(mixed $offset): bool
     {
-        return property_exists($this, $offset);
+        return property_exists($this, $offset) && isset($this->$offset);
     }
 
     public function offsetGet(mixed $offset): mixed
@@ -52,7 +52,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
 
     public function offsetUnset(mixed $offset): void
     {
-        if (isset($this->$offset)) {
+        if ($this->offsetExists($offset)) {
             unset($this->$offset);
         }
     }
