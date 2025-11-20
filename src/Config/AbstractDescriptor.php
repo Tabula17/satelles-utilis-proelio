@@ -18,7 +18,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
     public function __construct(?array $values = [])
     {
         if (is_array($values)) {
-            $this->_load($values);
+            $this->loadProperties($values);
         }
     }
 
@@ -36,7 +36,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
 
     public function offsetExists(mixed $offset): bool
     {
-        return property_exists($this, $offset) && isset($this->$offset);
+        return property_exists($this, $offset);
     }
 
     public function offsetGet(mixed $offset): mixed
@@ -52,7 +52,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
 
     public function offsetUnset(mixed $offset): void
     {
-        if ($this->offsetExists($offset)) {
+        if (isset($this->$offset)) {
             unset($this->$offset);
         }
     }
@@ -75,7 +75,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         return new ArrayIterator($this);
     }
 
-    public function _load(array $values): void
+    public function loadProperties(array $values): void
     {
         foreach ($values as $key => $value) {
             $this->set($key, $value);
@@ -106,7 +106,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
 
     public function __unserialize(array $data): void
     {
-        $this->_load($data);
+        $this->loadProperties($data);
     }
 
 }
