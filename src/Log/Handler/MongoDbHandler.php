@@ -56,7 +56,7 @@ class MongoDbHandler extends AbstractProcessingHandler
                 $this->mongoDb->createIndexes($collection, [
                     [
                         'name' => $collection . '_createdAt_1',
-                        'key' => ['createdAt' => 1],
+                        'key' => ['datetime' => 1],
                         'expireAfterSeconds' => 3600
                     ]
                 ]);
