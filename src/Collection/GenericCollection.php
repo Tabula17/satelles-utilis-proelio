@@ -65,7 +65,6 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         $filtered = array_filter($this->values, $callback);
         return new static(...$filtered);
     }
-
     public function map(callable $callback): array
     {
         return array_map($callback, $this->values);

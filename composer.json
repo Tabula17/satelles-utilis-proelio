@@ -31,14 +31,19 @@
       "psr/log": "^3.0"
   },
   "require-dev": {
-    "php-amqplib/php-amqplib": "^v3.7.3"
+    "php-amqplib/php-amqplib": "^v3.7.3",
+    "monolog/monolog": "^3.0",
+    "utopia-php/mongo": "^0.11.0"
   },
   "suggest": {
+    "utopia-php/mongo": "Para el uso de MongoDB como backend",
+    "monolog/monolog": "Para el uso de Monolog como logger",
     "php-amqplib/php-amqplib": "Para el uso de la cola de tareas AMQP",
     "ext-redis": "Para el uso de la cola de tareas REDIS",
     "ext-openssl": "Para el uso de la seguridad TLS en las conexiones",
     "ext-swoole": "Para el uso de componentes asincrónicos y de red",
     "ext-simplexml": "Para manejo de estructuras xml",
-    "ext-memcached": "Para el uso de memcached como cache backend"
+    "ext-memcached": "Para el uso de memcached como cache backend",
+    "ext-mongodb": "Para el uso de MongoDB como backend"
   }
 }
