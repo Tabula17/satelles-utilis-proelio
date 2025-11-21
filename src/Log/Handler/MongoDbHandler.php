@@ -55,6 +55,7 @@ class MongoDbHandler extends AbstractProcessingHandler
             if ($ttl > 0) {
                 $this->mongoDb->createIndexes($collection, [
                     [
+                        'name' => $collection . '_createdAt_1',
                         'key' => ['createdAt' => 1],
                         'expireAfterSeconds' => 3600
                     ]
