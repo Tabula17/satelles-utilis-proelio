@@ -57,7 +57,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
 
     public function find(callable $callback): mixed
     {
-        return array_find($this->values, static fn($value) => $callback($value));
+        return array_find($this->values, static fn($value, $key) => $callback($value, $key));
     }
 
     public function filter(callable $callback): static
@@ -73,12 +73,12 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
 
     public function some(callable $callback): bool
     {
-        return array_any($this->values, static fn($value) => $callback($value));
+        return array_any($this->values, static fn($value, $key) => $callback($value, $key));
     }
 
     public function every(callable $callback): bool
     {
-        return array_all($this->values, static fn($value) => $callback($value));
+        return array_all($this->values, static fn($value, $key) => $callback($value, $key));
     }
 
     public function first(): mixed
