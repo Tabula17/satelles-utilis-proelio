@@ -59,6 +59,10 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     {
         return array_find($this->values, static fn($value, $key) => $callback($value, $key));
     }
+    public function findKey(callable $callback): mixed
+    {
+        return array_find_key($this->values, static fn($value, $key) => $callback($value, $key));
+    }
 
     public function filter(callable $callback): static
     {
@@ -109,7 +113,14 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     {
         return array_unshift($this->values, ...$values);
     }
-
+    public function remove(mixed $value): void
+    {
+        $this->values = array_filter($this->values, static fn($item) => $item !== $value);
+    }
+    public function removeAt(int $index): void
+    {
+        unset($this->values[$index]);
+    }
     public function clear(): void
     {
         $this->values = [];
