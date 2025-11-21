@@ -126,6 +126,13 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         $this->values[] = $value;
     }
 
+    public function addIfNotExist(mixed $value): void
+    {
+        if (!in_array($value, $this->values, true)) {
+            $this->values[] = $value;
+        }
+    }
+
     // ArrayAccess methods
     public function offsetExists(mixed $offset): bool
     {
