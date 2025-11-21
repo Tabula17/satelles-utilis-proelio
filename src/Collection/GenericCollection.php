@@ -91,6 +91,41 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return $this->values[array_key_last($this->values)] ?? null;
     }
 
+    public function pop(): mixed
+    {
+        return array_pop($this->values);
+    }
+
+    public function push(...$values): int
+    {
+        return array_push($this->values, ...$values);
+    }
+
+    public function shift(): mixed
+    {
+        return array_shift($this->values);
+    }
+
+    public function unshift(...$values): int
+    {
+        return array_unshift($this->values, ...$values);
+    }
+
+    public function clear(): void
+    {
+        $this->values = [];
+    }
+
+    public function set(mixed $key, mixed $value): void
+    {
+        $this->values[$key] = $value;
+    }
+
+    public function add(mixed $value): void
+    {
+        $this->values[] = $value;
+    }
+
     // ArrayAccess methods
     public function offsetExists(mixed $offset): bool
     {
