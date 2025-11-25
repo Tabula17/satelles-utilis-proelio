@@ -2,6 +2,8 @@
 
 namespace Tabula17\Satelles\Utilis\Log\Handler;
 
+use Monolog\Formatter\FormatterInterface;
+use Monolog\Formatter\MongoDBFormatter;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
@@ -77,4 +79,14 @@ class MongoDbHandler extends AbstractProcessingHandler
     {
         $this->mongoDb->insert($this->collection, $record->toArray());
     }
+
+
+    /**
+     * @inheritDoc
+     */
+    protected function getDefaultFormatter(): FormatterInterface
+    {
+        return new MongoDBFormatter;
+    }
+
 }

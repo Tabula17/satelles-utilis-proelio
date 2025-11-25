@@ -17,15 +17,18 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
 {
     public function __construct(?array $values = [])
     {
-        if (is_array($values)) {
-            $this->loadProperties($values);
-        }
+        $this->loadProperties($values);
     }
 
-    public function set($property, $value): void
+    public function set(string $property, mixed $value): void
     {
         if (property_exists($this, $property)) {
-            $this->$property = $value;
+            $setterMethod = 'set' . ucfirst($property);
+            if (method_exists($this, $setterMethod)) {
+                $this->$setterMethod($value);
+            } else {
+                $this->$property = $value;
+            }
         }
     }
 
@@ -87,18 +90,47 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         return $this->toArray();
     }
 
+
+    /**
+     * Serializa un valor recursivamente
+     */
+    private function serializeValue(mixed $value): mixed
+    {
+        if (is_object($value)) {
+            if (method_exists($value, '__serialize')) {
+                return $value->__serialize();
+            }
+
+            if ($value instanceof \JsonSerializable) {
+                return $value->jsonSerialize();
+            }
+
+            if (method_exists($value, 'toArray')) {
+                return $value->toArray();
+            }
+        } elseif (is_array($value)) {
+            return array_map([$this, 'serializeValue'], $value);
+        }
+
+        return $value;
+    }
+
     public function __serialize(): array
     {
-        $definedVars = get_class_vars($this::class);
+        $defaultValues = get_class_vars(static::class);
+        $currentValues = get_object_vars($this);
         $data = [];
-        foreach (get_object_vars($this) as $property => $value) {
-            if (!property_exists($this, $property) || (array_key_exists($property, $definedVars) && $value === $definedVars[$property])) {
+
+        foreach ($currentValues as $property => $value) {
+            if (!property_exists($this, $property)) {
                 continue;
             }
-            if (is_object($value) && method_exists($value, '__serialize')) {
-                $data[$property] = $value->__serialize();
-            } else {
-                $data[$property] = $value;
+
+            $defaultValue = $defaultValues[$property] ?? null;
+
+            // Serializar solo si el valor es diferente al default
+            if ($value !== $defaultValue) {
+                $data[$property] = $this->serializeValue($value);
             }
         }
         return $data;
@@ -107,6 +139,21 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
     public function __unserialize(array $data): void
     {
         $this->loadProperties($data);
+    }
+
+    public function __get(string $name)
+    {
+        return $this->get($name);
+    }
+
+    public function __set(string $name, $value): void
+    {
+        $this->set($name, $value);
+    }
+
+    public function __isset(string $name): bool
+    {
+        return property_exists($this, $name) && isset($this->$name);
     }
 
 }
