@@ -77,6 +77,6 @@ class TCPServerConfig extends AbstractDescriptor
      * An associative array used to store configuration options -> https://wiki.swoole.com/en/#/server/setting
      * @var array $options
      */
-    protected array $options = [];
-
+    protected ?array $options = [];
+    protected ?TCPSSLConfig $ssl;
 }
