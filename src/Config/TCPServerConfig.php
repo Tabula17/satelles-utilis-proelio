@@ -56,7 +56,7 @@ class TCPServerConfig extends AbstractDescriptor
             }
         }
     }
-    protected(set) int $type {
+    protected(set) int $type = SWOOLE_SOCK_TCP {
         set {
             $valid = [
                 SWOOLE_SOCK_TCP,
