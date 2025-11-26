@@ -32,6 +32,7 @@ use Redis;
  */
 class RedisConfig extends ConnectionConfig
 {
+
     protected(set) float $connectTimeout = 0;
     protected(set) float $readTimeout = 0;
 
@@ -97,4 +98,5 @@ class RedisConfig extends ConnectionConfig
             }
         }
     }
+
 }

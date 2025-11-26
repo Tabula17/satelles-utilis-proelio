@@ -49,8 +49,9 @@ class ConnectionCollection extends GenericCollection
     {
         return array_filter(array_map(static fn(ConnectionConfig $config) => $config->$key, $this->values));
     }
-    public static function fromArray(array $config): self
+    public static function fromArray(array $config, ?string $type = null): self
     {
-        return new self(...array_map(static fn($item) => $item instanceof self::$type ? $item : new self::$type($item), $config));
+        $class = $type ?? static::$type;
+        return new self(...array_map(static fn($item) => $item instanceof $class ? $item : new $class($item), $config));
     }
 }
