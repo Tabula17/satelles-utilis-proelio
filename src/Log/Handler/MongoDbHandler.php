@@ -77,7 +77,7 @@ class MongoDbHandler extends AbstractProcessingHandler
      */
     protected function write(LogRecord $record): void
     {
-        $this->mongoDb->insert($this->collection, $record->toArray());
+        $this->mongoDb->insert($this->collection, $record->formatted);
     }
 
 
