@@ -30,30 +30,8 @@ use Redis;
  *   - REDIS_BACKOFF_ALGORITHM_DECORRELATED_JITTER
  *   The backoff configuration may also include 'base' and 'cap' values, defined in milliseconds, to set the minimum and maximum retry delays.
  */
-class RedisConfig extends AbstractDescriptor
+class RedisConfig extends ConnectionConfig
 {
-    /**
-     * [
-     * 'host'           => 'localhost',
-     * 'port'           => 6379,
-     * 'readTimeout'    => 2.5,
-     * 'connectTimeout' => 2.5,
-     * 'persistent'     => true,
-     * 'auth' => ['phpredis', 'phpredis'],
-     * 'ssl' => ['verify_peer' => false],
-     * 'retryInterval'  => 100,
-     * 'backoff' => [
-     * 'algorithm' => Redis::BACKOFF_ALGORITHM_DECORRELATED_JITTER,
-     * 'base'      => 500,
-     * 'cap'       => 750,
-     * ]
-     */
-    protected(set) string $host = '127.0.0.1' {
-        set {
-            $this->host = filter_var($value, FILTER_VALIDATE_IP) ? $value : gethostbyname($value);
-        }
-    }
-    protected(set) int $port = 6379;
     protected(set) float $connectTimeout = 0;
     protected(set) float $readTimeout = 0;
 
