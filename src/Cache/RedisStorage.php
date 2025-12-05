@@ -64,9 +64,10 @@ class RedisStorage implements CacheManagerInterface
         $this->redis->set($this->getKey($key), $value, $ttl);
     }
 
-    public function has(string $key): bool|int|Redis
+    public function has(string $key): bool
     {
-        return $this->redis->exists($this->getKey($key));
+        $exists = $this->redis->exists($this->getKey($key));
+        return $exists && $exists > 0;
     }
 
     public function delete(string $key): void

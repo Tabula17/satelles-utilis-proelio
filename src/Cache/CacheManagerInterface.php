@@ -25,7 +25,7 @@ interface CacheManagerInterface
      *
      * @param string $key The key to check for existence.
      */
-    public function has(string $key);
+    public function has(string $key): bool;
 
     /**
      * Deletes the value associated with the specified key.
