@@ -186,4 +186,8 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     {
         $this->values = $data;
     }
+    public function __clone()
+    {
+        $this->values = array_map(fn($value) => clone $value, $this->values);
+    }
 }
