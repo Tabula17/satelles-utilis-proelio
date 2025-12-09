@@ -155,5 +155,13 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
     {
         return property_exists($this, $name) && isset($this->$name);
     }
+    public function __unset(string $name): void
+    {
+        unset($this->$name);
+    }
+    public function __clone()
+    {
+        $this->loadProperties($this->__serialize());
+    }
 
 }
