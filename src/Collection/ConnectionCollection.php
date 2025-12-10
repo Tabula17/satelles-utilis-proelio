@@ -9,11 +9,6 @@ class ConnectionCollection extends TypedCollection
 
     public static string $type = ConnectionConfig::class;
 
-    public function __construct(ConnectionConfig...$connections)
-    {
-        parent::__construct(static::$type, $connections);
-    }
-
     /**
      * @param string $name
      * @return ConnectionConfig|null

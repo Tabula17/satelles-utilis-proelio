@@ -8,10 +8,6 @@ class TCPServerCollection extends TypedCollection
 {
     protected static string $type = TCPServerConfig::class;
 
-    public function __construct(TCPServerConfig...$connections)
-    {
-        parent::__construct(static::$type, $connections);
-    }
     /**
      * @param string $host
      * @return TCPServerConfig|null
