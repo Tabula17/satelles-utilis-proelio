@@ -4,6 +4,11 @@ namespace Tabula17\Satelles\Utilis\Collection;
 
 use Tabula17\Satelles\Utilis\Config\TCPServerConfig;
 
+
+/**
+ * Represents a collection of TCPServerConfig objects with utility methods for filtering,
+ * searching, and manipulating the collection by specific properties.
+ */
 class TCPServerCollection extends TypedCollection
 {
 

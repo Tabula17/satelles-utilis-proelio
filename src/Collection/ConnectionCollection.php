@@ -4,6 +4,12 @@ namespace Tabula17\Satelles\Utilis\Collection;
 
 use Tabula17\Satelles\Utilis\Config\ConnectionConfig;
 
+/**
+ * Represents a collection of ConnectionConfig objects with utility methods for finding, filtering,
+ * and removing configurations based on specific criteria. This class ensures that only
+ * ConnectionConfig objects are added to the collection.
+ */
+
 class ConnectionCollection extends TypedCollection
 {
     /**

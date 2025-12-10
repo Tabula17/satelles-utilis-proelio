@@ -2,7 +2,6 @@
 
 namespace Tabula17\Satelles\Utilis\Collection;
 
-use Tabula17\Satelles\Utilis\Collection\GenericCollection;
 use Tabula17\Satelles\Utilis\Exception\UnexpectedValueException;
 
 /**
