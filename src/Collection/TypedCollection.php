@@ -19,7 +19,7 @@ abstract class TypedCollection extends GenericCollection
     /**
      * @throws UnexpectedValueException
      */
-    public function __construct(array $values)
+    public function __construct(...$values)
     {
         if(!isset(static::$type)) {
             throw new UnexpectedValueException('Type must be defined for TypedCollection');
