@@ -4,13 +4,13 @@ namespace Tabula17\Satelles\Utilis\Collection;
 
 use Tabula17\Satelles\Utilis\Config\TCPServerConfig;
 
-class TCPServerCollection extends GenericCollection
+class TCPServerCollection extends TypedCollection
 {
-    private static string $type = TCPServerConfig::class;
+    protected static string $type = TCPServerConfig::class;
 
     public function __construct(TCPServerConfig...$connections)
     {
-        $this->values = $connections;
+        parent::__construct(static::$type, $connections);
     }
     /**
      * @param string $host
@@ -45,10 +45,5 @@ class TCPServerCollection extends GenericCollection
     public function collect(string $key): array
     {
         return array_filter(array_map(static fn(TCPServerConfig $config) => $config->$key, $this->values));
-    }
-    public static function fromArray(array $config, ?string $type = null): self
-    {
-        $class = $type ?? static::$type;
-        return new self(...array_map(static fn($item) => $item instanceof $class ? $item : new $class($item), $config));
     }
 }

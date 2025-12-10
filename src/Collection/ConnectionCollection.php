@@ -4,14 +4,14 @@ namespace Tabula17\Satelles\Utilis\Collection;
 
 use Tabula17\Satelles\Utilis\Config\ConnectionConfig;
 
-class ConnectionCollection extends GenericCollection
+class ConnectionCollection extends TypedCollection
 {
 
     public static string $type = ConnectionConfig::class;
 
     public function __construct(ConnectionConfig...$connections)
     {
-        $this->values = $connections;
+        parent::__construct(static::$type, $connections);
     }
 
     /**
@@ -48,10 +48,5 @@ class ConnectionCollection extends GenericCollection
     public function collect(string $key): array
     {
         return array_filter(array_map(static fn(ConnectionConfig $config) => $config->$key, $this->values));
-    }
-    public static function fromArray(array $config, ?string $type = null): self
-    {
-        $class = $type ?? static::$type;
-        return new self(...array_map(static fn($item) => $item instanceof $class ? $item : new $class($item), $config));
     }
 }
