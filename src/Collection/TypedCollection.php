@@ -14,26 +14,27 @@ use Tabula17\Satelles\Utilis\Exception\UnexpectedValueException;
  */
 abstract class TypedCollection extends GenericCollection
 {
-    protected static string $type;
 
     /**
      * @throws UnexpectedValueException
      */
     public function __construct(...$values)
     {
-        if(!isset(static::$type)) {
+        if(empty(static::getType())) {
             throw new UnexpectedValueException('Type must be defined for TypedCollection');
         }
-        array_walk($values, static fn($value) => $value instanceof self::$type ?: new self::$type($value));
+        $type = static::getType();
+        array_walk($values, static fn($value) => $value instanceof $type ?: new $type($value));
         $this->values = $values;
     }
 
+    abstract protected static function getType(): string;
     /**
      * @throws UnexpectedValueException
      */
     public static function fromArray(array $config, ?string $type = null): self
     {
-        $class = $type ?? static::$type;
+        $class = $type ?? static::getType();
         return new static(...array_map(static fn($item) => $item instanceof $class ? $item : new $class($item), $config));
     }
 }

@@ -6,9 +6,6 @@ use Tabula17\Satelles\Utilis\Config\ConnectionConfig;
 
 class ConnectionCollection extends TypedCollection
 {
-
-    public static string $type = ConnectionConfig::class;
-
     /**
      * @param string $name
      * @return ConnectionConfig|null
@@ -43,5 +40,10 @@ class ConnectionCollection extends TypedCollection
     public function collect(string $key): array
     {
         return array_filter(array_map(static fn(ConnectionConfig $config) => $config->$key, $this->values));
+    }
+
+    protected static function getType(): string
+    {
+        return ConnectionConfig::class;
     }
 }

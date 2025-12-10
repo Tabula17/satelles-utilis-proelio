@@ -6,7 +6,6 @@ use Tabula17\Satelles\Utilis\Config\TCPServerConfig;
 
 class TCPServerCollection extends TypedCollection
 {
-    protected static string $type = TCPServerConfig::class;
 
     /**
      * @param string $host
@@ -16,10 +15,12 @@ class TCPServerCollection extends TypedCollection
     {
         return $this->findBy('host', $host);
     }
+
     public function removeByHost(string $host): void
     {
         $this->removeBy('host', $host);
     }
+
     public function filterByHost(string $host): self
     {
         return $this->filterBy('host', $host);
@@ -34,12 +35,19 @@ class TCPServerCollection extends TypedCollection
     {
         return $this->filter(fn(TCPServerConfig $config) => $config->$key === $value);
     }
+
     public function removeBy(string $key, mixed $value): void
     {
         $this->remove($this->findBy($key, $value));
     }
+
     public function collect(string $key): array
     {
         return array_filter(array_map(static fn(TCPServerConfig $config) => $config->$key, $this->values));
+    }
+
+    protected static function getType(): string
+    {
+        return TCPServerConfig::class;
     }
 }
