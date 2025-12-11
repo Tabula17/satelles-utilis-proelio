@@ -18,15 +18,12 @@ trait CoroutineHelper
         if ($this->isInCoroutine()) {
             // En corutina, usar Coroutine::sleep
             Coroutine::sleep($seconds);
+        } else if ($seconds < 1) {
+            // Para segundos fraccionales
+            usleep((int)($seconds * 1000000));
         } else {
-            // Fuera de corutina, usar usleep o sleep normal
-            if ($seconds < 1) {
-                // Para segundos fraccionales
-                usleep((int)($seconds * 1000000));
-            } else {
-                // Para segundos enteros
-                sleep((int)$seconds);
-            }
+            // Para segundos enteros
+            sleep((int)$seconds);
         }
     }
     /**
