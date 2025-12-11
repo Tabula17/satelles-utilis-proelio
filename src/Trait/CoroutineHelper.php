@@ -8,7 +8,7 @@ trait CoroutineHelper
 {
     public function isInCoroutine(): bool
     {
-        return Coroutine::getCid() > 0;
+        return extension_loaded('swoole') && Coroutine::getCid() > 0;
     }
     /**
      * Sleep seguro que funciona tanto en corutinas como fuera de ellas
