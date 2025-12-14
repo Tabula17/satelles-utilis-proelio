@@ -6,6 +6,7 @@ use ArrayAccess;
 use ArrayIterator;
 use IteratorAggregate;
 use JsonSerializable;
+use ReflectionClass;
 use Traversable;
 
 /**
@@ -90,7 +91,26 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         return $this->toArray();
     }
 
+    /**
+     * Devuelve un array con los valores de las propiedades inicializadas
+     * IMPORTANTE: Al usar ReflectionClass la performance puede verse afectada
+     * @return array
+     */
+    public function getInitialized(): array
+    {
+        $reflection = new ReflectionClass($this);
+        $initializedProperties = array_filter(
+            $reflection->getProperties(),
+            fn($property) => $property->isInitialized($this)
+        );
 
+        $propertyNames = array_column($initializedProperties, 'name');
+
+        return array_intersect_key(
+            $this->toArray(),
+            array_flip($propertyNames)
+        );
+    }
     /**
      * Serializa un valor recursivamente
      */
