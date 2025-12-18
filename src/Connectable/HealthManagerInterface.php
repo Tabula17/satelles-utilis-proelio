@@ -45,4 +45,13 @@ interface HealthManagerInterface
      * Obtiene historial de checks
      */
     public function getCheckHistory(int $limit = 20): array;
+
+    /**
+     * Reports a failure occurrence from a specific worker and processes the given parameters accordingly.
+     *
+     * @param array $params An array of parameters related to the failure report.
+     * @param int $reportingWorkerId The unique identifier of the worker reporting the failure.
+     * @return array An array containing the status or result of processing the reported failure.
+     */
+    public function reportFailureFromWorker(array $params, int $reportingWorkerId): array;
 }
