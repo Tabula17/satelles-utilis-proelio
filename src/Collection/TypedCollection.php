@@ -19,7 +19,7 @@ abstract class TypedCollection extends GenericCollection
      */
     public function __construct(...$values)
     {
-        if(empty(static::getType())) {
+        if (empty(static::getType())) {
             throw new UnexpectedValueException('Type must be defined for TypedCollection');
         }
         $type = static::getType();
@@ -28,6 +28,16 @@ abstract class TypedCollection extends GenericCollection
     }
 
     abstract protected static function getType(): string;
+
+    public static function cast(mixed $value)
+    {
+        $class = static::getType();
+        if (!($value instanceof $class)) {
+            $value = new $class($value);
+        }
+        return $value;
+    }
+
     /**
      * @throws UnexpectedValueException
      */
@@ -36,4 +46,20 @@ abstract class TypedCollection extends GenericCollection
         $class = $type ?? static::getType();
         return new static(...array_map(static fn($item) => $item instanceof $class ? $item : new $class($item), $config));
     }
+
+    public function add(mixed $value): void
+    {
+        $this->values[] = static::cast($value);
+    }
+
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
+        $value = static::cast($value);
+        if ($offset === null) {
+            $this->values[] = $value;
+        } else {
+            $this->values[$offset] = $value;
+        }
+    }
+
 }
