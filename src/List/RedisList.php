@@ -43,6 +43,41 @@ class RedisList implements ListInterface
         return $this->redis->lrange($this->list, 0, -1);
     }
 
+    public function tail(int $limit): false|array
+    {
+        return $this->redis->lrange($this->list, -$limit, -1);
+    }
+
+    public function head(int $limit): false|array
+    {
+        return $this->redis->lrange($this->list, 0, $limit);
+    }
+
+    public function remove(mixed $value): int
+    {
+        return $this->redis->lrem($this->list, 0, $value);
+    }
+
+    public function removeAt(int $index): void
+    {
+        $this->redis->lrem($this->list, 0, $this->redis->lindex($this->list, $index));
+    }
+
+    public function trim(int $start, int $stop): void
+    {
+        $this->redis->ltrim($this->list, $start, $stop);
+    }
+
+    public function contains(mixed $value): bool
+    {
+        return $this->redis->lpos($this->list, $value) !== false;
+    }
+
+    public function isEmpty(): bool
+    {
+        return $this->redis->llen($this->list) === 0;
+    }
+
     public function clear(): void
     {
         $this->redis->del($this->list);
