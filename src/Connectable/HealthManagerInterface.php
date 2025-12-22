@@ -29,7 +29,7 @@ interface HealthManagerInterface
      * Ejecuta los health checks manualmente
      *
      */
-    public function performHealthChecks(int $workerId = 0, bool $retryUnreachable = false, bool $resetFailures = false): array;
+    public function performHealthChecks(int $workerId = 0, bool $resetFailures = false): array;
 
     /**
      * Obtiene estado de salud actual
