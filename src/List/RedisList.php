@@ -10,9 +10,10 @@ class RedisList implements ListInterface
     private Redis $redis;
 
     public function __construct(
-        RedisConfig $redisConfig,
-        string      $prefix = 'roga-list:',
-        null|int    $serializer = Redis::SERIALIZER_PHP
+        RedisConfig             $redisConfig,
+        private readonly string $list = 'roga-index',
+        string                  $prefix = 'satelles:',
+        null|int                $serializer = Redis::SERIALIZER_PHP
     )
     {
         $this->redis = new Redis(array_filter($redisConfig->toArray()));
@@ -26,34 +27,47 @@ class RedisList implements ListInterface
             $this->redis->setOption(Redis::OPT_SERIALIZER, $serializer);
         }
     }
-    public function add(string $key, string $value): void
+
+    public function getListName(): string
     {
-        $this->redis->rpush($key, $value);
+        return $this->list;
     }
-    public function get(string $key): array
+
+    public function add(string $value): void
     {
-        return $this->redis->lrange($key, 0, -1);
+        $this->redis->rpush($this->list, $value);
     }
-    public function clear(string $key): void
+
+    public function get(): array
     {
-        $this->redis->del($key);
+        return $this->redis->lrange($this->list, 0, -1);
     }
+
+    public function clear(): void
+    {
+        $this->redis->del($this->list);
+    }
+
     public function clearAll(): void
     {
         $this->redis->flushDB();
     }
-    public function getCount(string $key): int
+
+    public function getCount(): int
     {
-        return $this->redis->llen($key);
+        return $this->redis->llen($this->list);
     }
+
     public function getKeys(): array
     {
         return $this->redis->keys('*');
     }
-    public function pop(string $key): string|false
+
+    public function pop(): string|false
     {
-        return $this->redis->lpop($key);
+        return $this->redis->lpop($this->list);
     }
+
     public function __destruct()
     {
         $this->redis->close();
