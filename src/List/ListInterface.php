@@ -5,7 +5,7 @@ namespace Tabula17\Satelles\Utilis\List;
 interface ListInterface
 {
     public function getListName(): string;
-    public function add(string $value): void;
+    public function add(mixed $value): void;
 
     public function get(): array;
 

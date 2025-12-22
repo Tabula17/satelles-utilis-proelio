@@ -33,7 +33,7 @@ class RedisList implements ListInterface
         return $this->list;
     }
 
-    public function add(string $value): void
+    public function add(mixed $value): void
     {
         $this->redis->rpush($this->list, $value);
     }
