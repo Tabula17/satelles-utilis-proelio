@@ -98,7 +98,7 @@ class RedisList implements ListInterface
         return $this->redis->keys('*');
     }
 
-    public function pop(): string|false
+    public function pop(): Redis|string|array|bool
     {
         return $this->redis->lpop($this->list);
     }
