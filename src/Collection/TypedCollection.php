@@ -14,28 +14,47 @@ use Tabula17\Satelles\Utilis\Exception\UnexpectedValueException;
 abstract class TypedCollection extends GenericCollection
 {
 
+    private static array $primitive_types = ['bool', 'int', 'float', 'string', 'array', 'object', 'iterable', 'resource', 'null'];
+
     /**
      * @throws UnexpectedValueException
      */
     public function __construct(...$values)
     {
-        if (empty(static::getType())) {
+        $type = static::getType();
+        if (empty($type)) {
             throw new UnexpectedValueException('Type must be defined for TypedCollection');
         }
-        $type = static::getType();
-        array_walk($values, static fn($value) => $value instanceof $type ?: new $type($value));
+        if ($type === 'callable') {
+            throw new UnexpectedValueException('Callable is not a valid type for TypedCollection, use CallableCollection instead');
+        }
+        array_walk($values, static fn($value) => static::cast($value));
         $this->values = $values;
     }
 
     abstract protected static function getType(): string;
 
+    /**
+     * @throws UnexpectedValueException
+     */
     public static function cast(mixed $value)
     {
-        $class = static::getType();
-        if (!($value instanceof $class)) {
-            $value = new $class($value);
+        $class = strtolower(static::getType());
+
+        if (in_array(strtolower($class), static::$primitive_types, true)) {
+            $check = "is_$value";
+            if (!$check($value)) {
+                if ($class === 'resource' || $class === 'iterable') {
+                    throw new UnexpectedValueException("Value must be of type $class");
+                }
+                settype($value, $class);
+            }
+            return $value;
         }
-        return $value;
+        if (!class_exists($class)) {
+            throw new UnexpectedValueException("Class $class does not exist");
+        }
+        return $value instanceof $class ? $value : new $class($value);
     }
 
     /**
@@ -43,8 +62,7 @@ abstract class TypedCollection extends GenericCollection
      */
     public static function fromArray(array $config, ?string $type = null): self
     {
-        $class = $type ?? static::getType();
-        return new static(...array_map(static fn($item) => $item instanceof $class ? $item : new $class($item), $config));
+        return new static(...array_map(static fn($item) => static::cast($item), $config));
     }
 
     public function add(mixed $value): void
