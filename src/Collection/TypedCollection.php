@@ -39,9 +39,10 @@ abstract class TypedCollection extends GenericCollection
      */
     public static function cast(mixed $value)
     {
-        $class = strtolower(static::getType());
+        $class = static::getType();
 
         if (in_array(strtolower($class), static::$primitive_types, true)) {
+            $class = strtolower($class);
             $check = "is_$value";
             if (!$check($value)) {
                 if ($class === 'resource' || $class === 'iterable') {
