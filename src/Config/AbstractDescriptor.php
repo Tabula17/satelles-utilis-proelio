@@ -76,7 +76,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
 
     public function getIterator(): Traversable
     {
-        return new ArrayIterator($this);
+        return new ArrayIterator($this->toArray());
     }
 
     public function loadProperties(array $values): void
