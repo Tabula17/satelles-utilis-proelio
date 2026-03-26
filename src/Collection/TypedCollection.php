@@ -52,8 +52,11 @@ abstract class TypedCollection extends GenericCollection
             }
             return $value;
         }
-        if (!class_exists($class)) {
+        if (!class_exists($class) && !interface_exists($class)) {
             throw new UnexpectedValueException("Class $class does not exist");
+        }
+        if(!($value instanceof $class) && !class_exists($class) && interface_exists($class)){
+            throw new UnexpectedValueException("Value must implement $class but is of type ".get_class($value).". Cannot cast to $class");
         }
         return $value instanceof $class ? $value : new $class($value);
     }
