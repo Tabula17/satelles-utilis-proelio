@@ -19,10 +19,12 @@ use JsonSerializable;
 abstract class GenericCollection implements IteratorAggregate, ArrayAccess, JsonSerializable
 {
     protected array $values = [];
+
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->values);
     }
+
     public function toArray(): array
     {
         $result = [];
@@ -37,101 +39,139 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         }
         return $result;
     }
+
     public function jsonSerialize(): array
     {
         return $this->toArray();
     }
+
     public function count(): int
     {
         return count($this->values);
     }
+
     public function isEmpty(): bool
     {
         return empty($this->values);
     }
+
     public function find(callable $callback): mixed
     {
         return array_find($this->values, static fn($value, $key) => $callback($value, $key));
     }
+
     public function findKey(callable $callback): mixed
     {
         return array_find_key($this->values, static fn($value, $key) => $callback($value, $key));
     }
+
     public function filter(callable $callback): static
     {
         $filtered = array_filter($this->values, $callback);
         return new static(...$filtered);
     }
+
+    public function filterKeys(callable $callback): static
+    {
+        $filtered = array_filter($this->values, $callback, ARRAY_FILTER_USE_KEY);
+        return new static(...$filtered);
+    }
+    public function filterBy(string $key, mixed $value): static
+    {
+        return $this->filter(static fn($item) => $item->$key === $value);
+    }
+    public function reduce(callable $callback, mixed $initial = null): mixed
+    {
+        return array_reduce($this->values, $callback, $initial);
+    }
+
     public function map(callable $callback): array
     {
         return array_map($callback, $this->values);
     }
+
     public function some(callable $callback): bool
     {
         return array_any($this->values, static fn($value, $key) => $callback($value, $key));
     }
+
     public function every(callable $callback): bool
     {
         return array_all($this->values, static fn($value, $key) => $callback($value, $key));
     }
+
     public function first(): mixed
     {
         return $this->values[array_key_first($this->values)] ?? null;
     }
+
     public function last(): mixed
     {
         return $this->values[array_key_last($this->values)] ?? null;
     }
+
     public function pop(): mixed
     {
         return array_pop($this->values);
     }
+
     public function push(...$values): int
     {
         return array_push($this->values, ...$values);
     }
+
     public function shift(): mixed
     {
         return array_shift($this->values);
     }
+
     public function unshift(...$values): int
     {
         return array_unshift($this->values, ...$values);
     }
+
     public function remove(mixed $value): void
     {
         $this->values = array_filter($this->values, static fn($item) => $item !== $value);
     }
+
     public function removeAt(int $index): void
     {
         unset($this->values[$index]);
     }
+
     public function clear(): void
     {
         $this->values = [];
     }
+
     public function set(mixed $key, mixed $value): void
     {
         $this->values[$key] = $value;
     }
+
     public function add(mixed $value): void
     {
         $this->values[] = $value;
     }
+
     public function addIfNotExist(mixed $value): void
     {
         if (!in_array($value, $this->values, true)) {
             $this->values[] = $value;
         }
     }
+
     public function offsetExists(mixed $offset): bool
     {
         return isset($this->values[$offset]);
     }
+
     public function offsetGet(mixed $offset): mixed
     {
         return $this->values[$offset] ?? null;
     }
+
     public function offsetSet(mixed $offset, mixed $value): void
     {
         if ($offset === null) {
@@ -140,10 +180,12 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
             $this->values[$offset] = $value;
         }
     }
+
     public function offsetUnset(mixed $offset): void
     {
         unset($this->values[$offset]);
     }
+
     public function __serialize(): array
     {
         $definedVars = $this->values;
@@ -157,10 +199,12 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         }
         return $data;
     }
+
     public function __unserialize(array $data): void
     {
         $this->values = $data;
     }
+
     public function __clone()
     {
         $this->values = array_map(fn($value) => clone $value, $this->values);
