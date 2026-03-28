@@ -3,6 +3,7 @@
 namespace Tabula17\Satelles\Utilis\Collection;
 
 use ArrayIterator;
+use Countable;
 use IteratorAggregate;
 use JsonException;
 use Traversable;
@@ -16,7 +17,7 @@ use JsonSerializable;
  * IteratorAggregate for traversable behavior, ArrayAccess for array-like
  * manipulation, and JsonSerializable for JSON serialization.
  */
-abstract class GenericCollection implements IteratorAggregate, ArrayAccess, JsonSerializable
+abstract class GenericCollection implements IteratorAggregate, ArrayAccess, JsonSerializable, Countable
 {
     protected array $values = [];
 
