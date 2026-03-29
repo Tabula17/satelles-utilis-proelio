@@ -50,6 +50,6 @@ class ConnectionCollection extends TypedCollection
 
     protected static function getType(): string
     {
-        return ConnectionConfig::class;
+        return static::class;
     }
 }

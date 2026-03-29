@@ -53,6 +53,6 @@ class TCPServerCollection extends TypedCollection
 
     protected static function getType(): string
     {
-        return TCPServerConfig::class;
+        return static::class;
     }
 }
