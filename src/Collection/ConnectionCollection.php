@@ -12,6 +12,8 @@ use Tabula17\Satelles\Utilis\Config\ConnectionConfig;
 
 class ConnectionCollection extends TypedCollection
 {
+
+    public static string $type = ConnectionConfig::class;
     /**
      * @param string $name
      * @return ConnectionConfig|null
@@ -50,6 +52,6 @@ class ConnectionCollection extends TypedCollection
 
     protected static function getType(): string
     {
-        return ConnectionConfig::class;
+        return static::$type;
     }
 }
