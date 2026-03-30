@@ -64,7 +64,7 @@ abstract class TypedCollection extends GenericCollection
     /**
      * @throws UnexpectedValueException
      */
-    public static function fromArray(array $config, ?string $type = null): self
+    public static function fromArray(array $config, ?string $type = null): static
     {
         return new static(...array_map(static fn($item) => static::cast($item), $config));
     }
