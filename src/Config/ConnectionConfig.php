@@ -133,7 +133,7 @@ class ConnectionConfig extends AbstractDescriptor
     public function getSafeData(): array
     {
         $data = $this->toArray();
-        unset($data['password']);
+        unset($data['password'], $data['name'], $data['id'], $data['options'], $data['maxConnections'], $data['delay'], $data['lastConnectionError']);
         return $data;
     }
 
