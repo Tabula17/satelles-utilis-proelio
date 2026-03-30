@@ -99,7 +99,7 @@ class ConnectionConfig extends AbstractDescriptor
      * @var int $maxConnectons
      */
     protected(set) int $maxConnections;
-    protected(set) float $dealy;
+    protected(set) float $dealy = 0;
     protected(set) string $lastConnectionError;
 
     /**
