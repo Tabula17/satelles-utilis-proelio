@@ -103,7 +103,7 @@ class ConnectionConfig extends AbstractDescriptor
     protected(set) float $dealy = 0;
     protected(set) string $lastConnectionError;
 
-    public function tcpConnector(): ?Client
+    private function tcpConnector(): ?Client
     {
         $client = new Client(SWOOLE_SOCK_TCP);
         if (!$client->connect($this->host, $this->port)) {
@@ -111,6 +111,30 @@ class ConnectionConfig extends AbstractDescriptor
         }
         return $client;
 
+    }
+
+    private function unixConnector(): ?Client
+    {
+        $client = new Client(SWOOLE_SOCK_UNIX_STREAM);
+        if (!$client->connect($this->unixSocket)) {
+            return null;
+        }
+        return $client;
+    }
+
+    public function getConnector(): ?Client
+    {
+        if (isset($this->unixSocket)) {
+            return $this->unixConnector();
+        }
+        return $this->tcpConnector();
+    }
+
+    public function getSafeData(): array
+    {
+        $data = $this->toArray();
+        unset($data['password']);
+        return $data;
     }
 
     /**
