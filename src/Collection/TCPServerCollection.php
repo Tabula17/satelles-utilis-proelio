@@ -26,7 +26,7 @@ class TCPServerCollection extends TypedCollection
         $this->removeBy('host', $host);
     }
 
-    public function filterByHost(string $host): self
+    public function filterByHost(string $host): static
     {
         return $this->filterBy('host', $host);
     }
@@ -36,7 +36,7 @@ class TCPServerCollection extends TypedCollection
         return $this->find(fn(TCPServerConfig $config) => $config->$key === $value);
     }
 
-    public function filterBy(string $key, mixed $value): self
+    public function filterBy(string $key, mixed $value): static
     {
         return $this->filter(fn(TCPServerConfig $config) => $config->$key === $value);
     }

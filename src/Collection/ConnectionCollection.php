@@ -25,7 +25,7 @@ class ConnectionCollection extends TypedCollection
         $this->removeBy('name', $name);
     }
 
-    public function filterByHost(string $name): self
+    public function filterByHost(string $name): static
     {
         return $this->filterBy('host', $name);
     }
@@ -35,7 +35,7 @@ class ConnectionCollection extends TypedCollection
         return $this->find(fn(ConnectionConfig $config) => $config->$key === $value);
     }
 
-    public function filterBy(string $key, mixed $value): self
+    public function filterBy(string $key, mixed $value): static
     {
         return $this->filter(fn(ConnectionConfig $config) => $config->$key === $value);
     }

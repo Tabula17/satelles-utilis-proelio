@@ -27,7 +27,7 @@ class CallableCollection extends GenericCollection
         return $value;
     }
 
-    public static function fromArray(array $config, ?string $type = null): self
+    public static function fromArray(array $config, ?string $type = null): static
     {
         $class = $type ?? static::getType();
         return new static(...array_map(static fn($item) => static::cast($item), $config));
