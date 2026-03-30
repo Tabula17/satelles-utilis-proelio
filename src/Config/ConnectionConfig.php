@@ -2,6 +2,7 @@
 
 namespace Tabula17\Satelles\Utilis\Config;
 
+use Swoole\Client;
 use Tabula17\Satelles\Utilis\Exception\ExceptionDefinitions;
 use Tabula17\Satelles\Utilis\Exception\InvalidArgumentException;
 
@@ -101,6 +102,16 @@ class ConnectionConfig extends AbstractDescriptor
     protected(set) int $maxConnections;
     protected(set) float $dealy = 0;
     protected(set) string $lastConnectionError;
+
+    public function tcpConnector(): ?Client
+    {
+        $client = new Client(SWOOLE_SOCK_TCP);
+        if (!$client->connect($this->host, $this->port)) {
+            return null;
+        }
+        return $client;
+
+    }
 
     /**
      * Checks if a connection to the specified host and port can be established.
