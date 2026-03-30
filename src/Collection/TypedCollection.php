@@ -37,10 +37,12 @@ abstract class TypedCollection extends GenericCollection
     /**
      * @throws UnexpectedValueException
      */
-    public static function cast(mixed $value)
+    public static function cast(mixed $value, ?string $type = null)
     {
         $class = static::getType();
-
+        if (isset($type) && is_subclass_of($type, $class)) {
+            $class = $type;
+        }
         if (in_array(strtolower($class), static::$primitive_types, true)) {
             $class = strtolower($class);
             $check = "is_$value";
@@ -55,8 +57,8 @@ abstract class TypedCollection extends GenericCollection
         if (!class_exists($class) && !interface_exists($class)) {
             throw new UnexpectedValueException("Class $class does not exist");
         }
-        if(!($value instanceof $class) && !class_exists($class) && interface_exists($class)){
-            throw new UnexpectedValueException("Value must implement $class but is of type ".get_class($value).". Cannot cast to $class");
+        if (!($value instanceof $class) && !class_exists($class) && interface_exists($class)) {
+            throw new UnexpectedValueException("Value must implement $class but is of type " . get_class($value) . ". Cannot cast to $class");
         }
         return $value instanceof $class ? $value : new $class($value);
     }
