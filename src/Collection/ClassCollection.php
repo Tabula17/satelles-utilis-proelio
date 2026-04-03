@@ -6,6 +6,7 @@ use Tabula17\Satelles\Utilis\Exception\UnexpectedValueException;
 
 class ClassCollection extends GenericCollection
 {
+    public static ?string $type = null;
     public function __construct(...$values)
     {
 
@@ -13,12 +14,25 @@ class ClassCollection extends GenericCollection
         $this->values = $values;
     }
 
-    protected static function checkType($value): string|false
+    protected static function checkType($value): bool
     {
         if (is_object($value)) {
             $value = get_class($value);
         }
-        return class_exists($value);
+        $valid = class_exists($value);
+        if($valid && static::$type!==null)
+        {
+            if(!class_exists(static::$type))
+            {
+                trigger_error("The specified type " . static::$type . " does not exist.", E_USER_WARNING);
+                return false;
+            }
+            $valid = is_subclass_of($value, static::$type);
+            if(!$valid){
+                trigger_error("The specified $value is not subclass of " . static::$type, E_USER_WARNING);
+            }
+        }
+        return $valid;
     }
 
     public static function fromArray(array $config, ?string $type = null): static
