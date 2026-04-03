@@ -86,4 +86,17 @@ abstract class TypedCollection extends GenericCollection
         }
     }
 
+
+    public function set(mixed $key, mixed $value): void
+    {
+        $this->values[$key] =  static::cast($value);
+    }
+
+
+    public function addIfNotExist(mixed $value): void
+    {
+        if (!in_array($value, $this->values, true)) {
+            $this->values[] =  static::cast($value);
+        }
+    }
 }
