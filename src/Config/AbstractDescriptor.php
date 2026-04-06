@@ -137,9 +137,9 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         return $value;
     }
 
-    public function getModel(): array
+    public static function getModel(): array
     {
-        $reflection = new ReflectionClass($this);
+        $reflection = new ReflectionClass(static::class);
         $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
         $model = [];
         foreach ($properties as $property) {
@@ -147,9 +147,10 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
                 [
                     'type' => $property->getType()?->getName() ?? 'mixed',
                 ];
-            /*if (is_a($property->getType()?->getName() ?? '', AbstractDescriptor::class, true)) {
-                $model[$property->getName()]['model']['descriptor'] = (new ($property->getType()->getName()))->getModel();
-            }*/
+            if (is_a($property->getType()?->getName() ?? '', AbstractDescriptor::class, true)) {
+                $child = ($property->getType()->getName());
+                $model[$property->getName()]['model']['descriptor'] = $child::getModel();
+            }
         }
         return $model;
 
