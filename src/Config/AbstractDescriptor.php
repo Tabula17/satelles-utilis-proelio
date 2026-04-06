@@ -138,57 +138,6 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         return $value;
     }
 
-    public static function getModelInfo(): array
-    {
-        $reflection = new ReflectionClass(static::class);
-        $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
-        $model = [
-            'class' => static::class,
-            'constructor' => [],
-            'properties' => [],
-
-        ];
-        foreach ($reflection->getConstructor()?->getParameters() ?? [] as $parameter) {
-
-            $prpopType = $parameter->getType();
-            if ($prpopType instanceof ReflectionUnionType) {
-                $type = [];
-                foreach ($prpopType->getTypes() as $unionType) {
-                    $type[] = $unionType->getName();
-                }
-                $type = implode('|', $type);
-            } else {
-                $type = $prpopType?->getName() ?? 'mixed';
-            }
-            $model['constructor'][$parameter->getName()] =
-                [
-                    'type' => $type,
-                ];
-        }
-        foreach ($properties as $property) {
-
-            $prpopType = $property->getType();
-            if ($prpopType instanceof ReflectionUnionType) {
-                $type = [];
-                foreach ($prpopType->getTypes() as $unionType) {
-                    $type[] = $unionType->getName();
-                }
-                $type = implode('|', $type);
-            } else {
-                $type = $prpopType?->getName() ?? 'mixed';
-            }
-            $model['properties'][$property->getName()] =
-                [
-                    'type' =>$type,
-                ];
-            if (is_a($type, AbstractDescriptor::class, true)) {
-                $model['properties'][$property->getName()]['model'] = $type::getModelInfo();
-            }
-        }
-        return $model;
-
-    }
-
     public static function getModel(): array
     {
         $response = [];
