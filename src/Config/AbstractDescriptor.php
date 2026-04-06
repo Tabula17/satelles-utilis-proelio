@@ -158,7 +158,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
                 }
                 $type = implode('|', $type);
             } else {
-                $type = $prpopType ?? 'mixed';
+                $type = $prpopType?->getName() ?? 'mixed';
             }
             $model['constructor'][$parameter->getName()] =
                 [
@@ -175,7 +175,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
                 }
                 $type = implode('|', $type);
             } else {
-                $type = $prpopType ?? 'mixed';
+                $type = $prpopType?->getName() ?? 'mixed';
             }
             $model['properties'][$property->getName()] =
                 [
@@ -203,7 +203,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
                 }
                 $type = implode('|', $type);
             } else {
-                $type = $prpopType ?? 'mixed';
+                $type = $prpopType?->getName() ?? 'mixed';
             }
 
             if (is_a($type, AbstractDescriptor::class, true)) {
