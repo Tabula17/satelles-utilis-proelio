@@ -177,7 +177,11 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         foreach ($properties as $property) {
             $prpopType = $property->getType();
             if ($prpopType instanceof ReflectionUnionType) {
-                $type = $prpopType->getTypes();
+                $type = [];
+                foreach ($prpopType->getTypes() as $type) {
+                    $type[] = $type->getName();
+                }
+                $type = implode('|', $type);
             } else {
                 $type = $prpopType ?? 'mixed';
             }
