@@ -111,6 +111,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
             array_flip($propertyNames)
         );
     }
+
     /**
      * Serializa un valor recursivamente
      */
@@ -175,13 +176,19 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
     {
         return property_exists($this, $name) && isset($this->$name);
     }
+
     public function __unset(string $name): void
     {
         unset($this->$name);
     }
+
     public function __clone()
     {
         $this->loadProperties($this->__serialize());
     }
 
+    public function __invoke(): array
+    {
+        return $this->toArray();
+    }
 }
