@@ -147,9 +147,9 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
                 [
                     'type' => $property->getType()?->getName() ?? 'mixed',
                 ];
-            if (is_a($property->getType()?->getName() ?? '', AbstractDescriptor::class, true)) {
+            /*if (is_a($property->getType()?->getName() ?? '', AbstractDescriptor::class, true)) {
                 $model[$property->getName()]['model']['descriptor'] = (new ($property->getType()->getName()))->getModel();
-            }
+            }*/
         }
         return $model;
 
