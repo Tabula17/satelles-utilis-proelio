@@ -153,8 +153,8 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
             $prpopType = $parameter->getType();
             if ($prpopType instanceof ReflectionUnionType) {
                 $type = [];
-                foreach ($prpopType->getTypes() as $type) {
-                    $type[] = $type->getName();
+                foreach ($prpopType->getTypes() as $unionType) {
+                    $type[] = $unionType->getName();
                 }
                 $type = implode('|', $type);
             } else {
@@ -170,8 +170,8 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
             $prpopType = $property->getType();
             if ($prpopType instanceof ReflectionUnionType) {
                 $type = [];
-                foreach ($prpopType->getTypes() as $type) {
-                    $type[] = $type->getName();
+                foreach ($prpopType->getTypes() as $unionType) {
+                    $type[] = $unionType->getName();
                 }
                 $type = implode('|', $type);
             } else {
@@ -198,8 +198,8 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
             $prpopType = $property->getType();
             if ($prpopType instanceof ReflectionUnionType) {
                 $type = [];
-                foreach ($prpopType->getTypes() as $type) {
-                    $type[] = $type->getName();
+                foreach ($prpopType->getTypes() as $unionType) {
+                    $type[] = $unionType->getName();
                 }
                 $type = implode('|', $type);
             } else {
