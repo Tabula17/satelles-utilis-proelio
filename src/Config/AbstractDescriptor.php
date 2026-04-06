@@ -168,7 +168,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
 
     }
 
-    public static function getResponseModel(): array
+    public static function getModel(): array
     {
         $response = [];
         $reflection = new ReflectionClass(static::class);
