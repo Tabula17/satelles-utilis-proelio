@@ -7,6 +7,7 @@ use ArrayIterator;
 use IteratorAggregate;
 use JsonSerializable;
 use ReflectionClass;
+use ReflectionProperty;
 use Traversable;
 
 /**
@@ -136,6 +137,24 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         return $value;
     }
 
+    public function getModel(): array
+    {
+        $reflection = new ReflectionClass($this);
+        $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
+        $model = [];
+        foreach ($properties as $property) {
+            $model[$property->getName()] =
+                [
+                    'type' => $property->getType()?->getName() ?? 'mixed',
+                ];
+            if (is_a($property->getType()?->getName() ?? '', AbstractDescriptor::class, true)) {
+                $model[$property->getName()]['model']['descriptor'] = (new ($property->getType()->getName()))->getModel();
+            }
+        }
+        return $model;
+
+    }
+
     public function __serialize(): array
     {
         $defaultValues = get_class_vars(static::class);
@@ -191,4 +210,5 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
     {
         return $this->toArray();
     }
+
 }
