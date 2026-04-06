@@ -137,7 +137,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         return $value;
     }
 
-    public static function getModel(): array
+    public static function getModelInfo(): array
     {
         $reflection = new ReflectionClass(static::class);
         $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
@@ -154,17 +154,35 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
                 ];
         }
         foreach ($properties as $property) {
+
             $model['properties'][$property->getName()] =
                 [
                     'type' => $property->getType()?->getName() ?? 'mixed',
                 ];
             if (is_a($property->getType()?->getName() ?? '', AbstractDescriptor::class, true)) {
                 $child = ($property->getType()->getName());
-                $model['properties'][$property->getName()]['model'] = $child::getModel();
+                $model['properties'][$property->getName()]['model'] = $child::getModelInfo();
             }
         }
         return $model;
 
+    }
+
+    public static function getResponseModel(): array
+    {
+        $response = [];
+        $reflection = new ReflectionClass(static::class);
+        $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
+        foreach ($properties as $property) {
+            if (is_a($property->getType()?->getName() ?? '', AbstractDescriptor::class, true)) {
+                $child = ($property->getType()->getName());
+                $response[$property->getName()] = $child::getResponseModel();
+            } else {
+
+                $response[$property->getName()] = $property->getType()?->getName() ?? 'mixed';
+            }
+        }
+        return $response;
     }
 
     public function __serialize(): array
