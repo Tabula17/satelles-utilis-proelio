@@ -149,20 +149,40 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
 
         ];
         foreach ($reflection->getConstructor()?->getParameters() ?? [] as $parameter) {
+
+            $prpopType = $parameter->getType();
+            if ($prpopType instanceof ReflectionUnionType) {
+                $type = [];
+                foreach ($prpopType->getTypes() as $type) {
+                    $type[] = $type->getName();
+                }
+                $type = implode('|', $type);
+            } else {
+                $type = $prpopType ?? 'mixed';
+            }
             $model['constructor'][$parameter->getName()] =
                 [
-                    'type' => $parameter->getType()?->getName() ?? 'mixed',
+                    'type' => $type,
                 ];
         }
         foreach ($properties as $property) {
 
+            $prpopType = $property->getType();
+            if ($prpopType instanceof ReflectionUnionType) {
+                $type = [];
+                foreach ($prpopType->getTypes() as $type) {
+                    $type[] = $type->getName();
+                }
+                $type = implode('|', $type);
+            } else {
+                $type = $prpopType ?? 'mixed';
+            }
             $model['properties'][$property->getName()] =
                 [
-                    'type' => $property->getType()?->getName() ?? 'mixed',
+                    'type' =>$type,
                 ];
-            if (is_a($property->getType()?->getName() ?? '', AbstractDescriptor::class, true)) {
-                $child = ($property->getType()->getName());
-                $model['properties'][$property->getName()]['model'] = $child::getModelInfo();
+            if (is_a($type, AbstractDescriptor::class, true)) {
+                $model['properties'][$property->getName()]['model'] = $type::getModelInfo();
             }
         }
         return $model;
