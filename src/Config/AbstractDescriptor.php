@@ -143,10 +143,16 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
         $model = [
             'class' => static::class,
-            'constructor' => $reflection->getConstructor()?->getParameters(),
+            'constructor' => [],
             'properties' => [],
 
         ];
+        foreach ($reflection->getConstructor()?->getParameters() ?? [] as $parameter) {
+            $model['constructor'][$parameter->getName()] =
+                [
+                    'type' => $parameter->getType()?->getName() ?? 'mixed',
+                ];
+        }
         foreach ($properties as $property) {
             $model['properties'][$property->getName()] =
                 [
