@@ -8,6 +8,7 @@ use IteratorAggregate;
 use JsonSerializable;
 use ReflectionClass;
 use ReflectionProperty;
+use ReflectionUnionType;
 use Traversable;
 
 /**
@@ -174,12 +175,18 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         $reflection = new ReflectionClass(static::class);
         $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
         foreach ($properties as $property) {
-            if (is_a($property->getType()?->getName() ?? '', AbstractDescriptor::class, true)) {
-                $child = ($property->getType()->getName());
-                $response[$property->getName()] = $child::getModel();
+            $prpopType = $property->getType();
+            if ($prpopType instanceof ReflectionUnionType) {
+                $type = $prpopType->getTypes();
+            } else {
+                $type = $prpopType ?? 'mixed';
+            }
+
+            if (is_a($type, AbstractDescriptor::class, true)) {
+                $response[$property->getName()] = $type::getModel();
             } else {
 
-                $response[$property->getName()] = $property->getType()?->getName() ?? 'mixed';
+                $response[$property->getName()] = $type;
             }
         }
         return $response;
