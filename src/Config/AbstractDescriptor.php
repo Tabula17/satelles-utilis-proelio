@@ -18,8 +18,15 @@ use Traversable;
  */
 abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, JsonSerializable
 {
+    private array $publicProperties = [];
+
     public function __construct(?array $values = [])
     {
+        $reflection = new ReflectionClass(static::class);
+        $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
+        foreach ($properties as $property) {
+            $this->publicProperties[] = $property->getName();
+        }
         $this->loadProperties($values);
     }
 
@@ -34,10 +41,12 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
             }
         }
     }
+
     private function isAccessible(string $property): bool
     {
-        return array_key_exists($property, get_object_vars($this));
+        return in_array($property, $this->publicProperties, true);
     }
+
     public function get(string $property): mixed
     {
         if (!$this->isAccessible($property)) {
@@ -93,10 +102,12 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
             $this->set($key, $value);
         }
     }
+
     public function hasProperty(string $property): bool
     {
         return property_exists($this, $property);
     }
+
     public function jsonSerialize(): array
     {
         return $this->toArray();
