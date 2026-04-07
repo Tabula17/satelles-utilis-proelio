@@ -25,7 +25,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
 
     public function set(string $property, mixed $value): void
     {
-        if (property_exists($this, $property)) {
+        if (property_exists($this, $property) && $this->isAccessible($property)) {
             $setterMethod = 'set' . ucfirst($property);
             if (method_exists($this, $setterMethod)) {
                 $this->$setterMethod($value);
@@ -34,9 +34,15 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
             }
         }
     }
-
+    private function isAccessible(string $property): bool
+    {
+        return array_key_exists($property, get_object_vars($this));
+    }
     public function get(string $property): mixed
     {
+        if (!$this->isAccessible($property)) {
+            return null;
+        }
         return $this->$property;
     }
 
@@ -87,7 +93,10 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
             $this->set($key, $value);
         }
     }
-
+    public function hasProperty(string $property): bool
+    {
+        return property_exists($this, $property);
+    }
     public function jsonSerialize(): array
     {
         return $this->toArray();
