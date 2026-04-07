@@ -82,6 +82,9 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
     {
         $data = [];
         foreach (get_object_vars($this) as $property => $value) {
+            if (!$this->isAccessible($property)) {
+                continue;
+            }
             if (is_object($value) && method_exists($value, 'toArray')) {
                 $data[$property] = $value->toArray();
             } else {
