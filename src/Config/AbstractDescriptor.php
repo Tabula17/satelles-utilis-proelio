@@ -81,7 +81,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
     public function toArray(): array
     {
         $data = [];
-        foreach (get_object_vars($this) as $property => $value) {
+        foreach (get_mangled_object_vars($this) as $property => $value) { //get_object_vars
             if (!$this->isAccessible($property)) {
                 continue;
             }
@@ -191,7 +191,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
     public function __serialize(): array
     {
         $defaultValues = get_class_vars(static::class);
-        $currentValues = get_object_vars($this);
+        $currentValues = get_mangled_object_vars($this);
         $data = [];
 
         foreach ($currentValues as $property => $value) {
