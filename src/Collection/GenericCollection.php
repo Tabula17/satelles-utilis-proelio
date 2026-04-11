@@ -195,6 +195,25 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         unset($this->values[$offset]);
     }
 
+    /**
+     * Merges the current collection with one or more provided collections.
+     *
+     * @param bool $strict Determines whether to enforce that all provided collections must be instances of the same class as the current object.
+     * @param self ...$collections One or more collections to merge with the current collection.
+     * @return void
+     */
+    public function merge(bool $strict = false, self ...$collections): void
+    {
+        $values = $this->values;
+        foreach ($collections as $collection) {
+            if ($strict && !($collection instanceof static)) {
+                continue;
+            }
+            $values = $collection->toArray();
+        }
+        $this->values = array_merge(...$values);
+    }
+
     public function __serialize(): array
     {
         $definedVars = $this->values;
