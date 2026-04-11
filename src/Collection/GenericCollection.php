@@ -214,6 +214,11 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         $this->values = array_merge(...$values);
     }
 
+    public function extractAll(): array
+    {
+        return $this->values;
+    }
+
     public function __serialize(): array
     {
         $definedVars = $this->values;
