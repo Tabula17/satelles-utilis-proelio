@@ -110,9 +110,9 @@ abstract class TypedEnumCollection extends GenericCollection
     {
         $values = [];
 
-        foreach ($config as $item) {
+        foreach ($config as $key => $item) {
             try {
-                $values[] = static::cast($item);
+                $values[$key] = static::cast($item);
             } catch (\Throwable $e) {
                 continue;
             }
