@@ -39,11 +39,9 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
      */
     public function toArray(): array
     {
-        $result = [];
-        foreach ($this->values as $key => $value) {
-            $result[$key] = $this->normalizeValue($value);
-        }
-        return $result;
+        return array_map(function ($value) {
+            return $this->normalizeValue($value);
+        }, $this->values);
     }
 
     /**

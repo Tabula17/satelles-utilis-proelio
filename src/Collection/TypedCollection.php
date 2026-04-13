@@ -2,7 +2,9 @@
 
 namespace Tabula17\Satelles\Utilis\Collection;
 
+use Tabula17\Satelles\Utilis\Exception\InvalidArgumentException;
 use Tabula17\Satelles\Utilis\Exception\UnexpectedValueException;
+use Throwable;
 
 /**
  * Represents a typed collection that enforces all items to be instances of a specified type.
@@ -22,13 +24,13 @@ abstract class TypedCollection extends GenericCollection
     public function __construct(...$values)
     {
         $type = static::getType();
-        if (empty($type)) {
+        if ($type === '') {
             throw new UnexpectedValueException('Type must be defined for TypedCollection');
         }
         if ($type === 'callable') {
             throw new UnexpectedValueException('Callable is not a valid type for TypedCollection, use CallableCollection instead');
         }
-        array_walk($values, static fn($value) => static::cast($value));
+        array_walk($values, static fn(&$value) => static::cast($value));
         $this->values = $values;
     }
 
@@ -45,7 +47,7 @@ abstract class TypedCollection extends GenericCollection
         }
         if (in_array(strtolower($class), static::$primitive_types, true)) {
             $class = strtolower($class);
-            $check = "is_$value";
+            $check = "is_$class";
             if (!$check($value)) {
                 if ($class === 'resource' || $class === 'iterable') {
                     throw new UnexpectedValueException("Value must be of type $class");
@@ -55,20 +57,41 @@ abstract class TypedCollection extends GenericCollection
             return $value;
         }
         if (!class_exists($class) && !interface_exists($class)) {
-            throw new UnexpectedValueException("Class $class does not exist");
+            throw new UnexpectedValueException("Class or Interface $class does not exist");
         }
-        if (!($value instanceof $class) && !class_exists($class) && interface_exists($class)) {
-            throw new UnexpectedValueException("Value must implement $class but is of type " . get_class($value) . ". Cannot cast to $class");
+        if (is_object($value)) {
+            if (!($value instanceof $class)) {
+                if (interface_exists($class)) {
+                    throw new UnexpectedValueException("Value must implement $class. Cannot cast to $class");
+                }
+                throw new UnexpectedValueException("Value must be of type $class");
+            }
+            return $value;
         }
-        return $value instanceof $class ? $value : new $class($value);
+        try {
+            return new $class($value);
+        } catch (\Throwable $e) {
+            throw new UnexpectedValueException("Unable to instantiate $class from value", 0, $e);
+        }
     }
+
 
     /**
      * @throws UnexpectedValueException
      */
-    public static function fromArray(array $config, ?string $type = null): static
+    public static function fromArray(array $config): static
     {
-        return new static(...array_map(static fn($item) => static::cast($item, $type), $config));
+        $values = [];
+
+        foreach ($config as $item) {
+            try {
+                $values[] = static::cast($item);
+            } catch (\Throwable $e) {
+                continue;
+            }
+        }
+
+        return new static(...$values);
     }
 
     public function add(mixed $value): void
@@ -88,6 +111,9 @@ abstract class TypedCollection extends GenericCollection
 
     public function set(mixed $key, mixed $value): void
     {
+        if ($key === null) {
+            throw new InvalidArgumentException("Cannot set null key, use add() instead");
+        }
         $this->values[$key] = static::cast($value);
     }
 
