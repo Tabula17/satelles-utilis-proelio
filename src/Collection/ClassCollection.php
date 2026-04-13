@@ -65,11 +65,11 @@ class ClassCollection extends GenericCollection
     }
 
 
-    public function addIfNotExist(mixed $value): void
+    public function addIfNotExist(mixed $value, bool $strict = true): bool
     {
         if (static::checkType($value) && !in_array($value, $this->values, true)) {
             $this->values[] = static::checkType($value);
         }
-
+        return false;
     }
 }

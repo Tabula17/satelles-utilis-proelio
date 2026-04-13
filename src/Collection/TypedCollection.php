@@ -78,25 +78,22 @@ abstract class TypedCollection extends GenericCollection
 
     public function offsetSet(mixed $offset, mixed $value): void
     {
-        $value = static::cast($value);
         if ($offset === null) {
-            $this->values[] = $value;
+            $this->add($value);
         } else {
-            $this->values[$offset] = $value;
+            $this->set($offset, $value);
         }
     }
 
 
     public function set(mixed $key, mixed $value): void
     {
-        $this->values[$key] =  static::cast($value);
+        $this->values[$key] = static::cast($value);
     }
 
 
-    public function addIfNotExist(mixed $value): void
+    public function addIfNotExist(mixed $value, bool $strict = true): bool
     {
-        if (!in_array($value, $this->values, true)) {
-            $this->values[] =  static::cast($value);
-        }
+        return parent::addIfNotExist(static::cast($value), true);
     }
 }
