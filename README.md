@@ -140,11 +140,48 @@ Basic example:
 
 ```php
 use Tabula17\Satelles\Utilis\Print\CupsClient;
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Monolog\Level;
 
-$cups = new CupsClient('localhost', 631);
-$printers = $cups->getPrinters();
-// $cups->printJob('printer-name', $data, 'Document title', ['copies' => 2]);
-$cups->disconnect();
+try {
+    $cups = new CupsClient('print-server.local', 631, 10.0, 'admin', 'secret');
+    
+    // Activar debug si es necesario
+    $cups->setDebug(true);
+    
+    // Configurar logger 
+    $cups->setLogger(new Logger('cups.logstream', new StreamHandler('php://stdout', Level::Debug)));
+    
+    // Health check
+    $health = $cups->healthCheck();
+    echo "Estado del servidor: {$health['status']}\n";
+    
+    // Listar impresoras
+    $printers = $cups->getPrinters();
+    echo "Impresoras disponibles: " . count($printers) . "\n";
+    
+    // Ver estado de una impresora
+    $state = $cups->getPrinterState('Office_Printer');
+    echo "Estado: {$state['state']}\n";
+    
+    // Enviar trabajo
+    $result = $cups->printJob(
+        'Office_Printer',
+        'Contenido a imprimir...',
+        'Reporte Mensual',
+        [
+            'copies' => 2,
+            'page-ranges' => '1-10',
+            'print-quality' => 'high'
+        ]
+    );
+    
+    echo "Trabajo enviado: " . ($result['status-message'] ?? 'OK') . "\n";
+    
+} catch (Exception $e) {
+    echo "Error: " . $e->getMessage() . "\n";
+}
 ```
 
 

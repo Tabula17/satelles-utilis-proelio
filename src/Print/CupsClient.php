@@ -28,12 +28,13 @@ class CupsClient
 
     // Añadir validación en el constructor
     public function __construct(
-        string $host = 'localhost',
-        int $port = 631,
-        float $timeout = 5.0,
+        string  $host = 'localhost',
+        int     $port = 631,
+        float   $timeout = 5.0,
         ?string $username = null,
         ?string $password = null
-    ) {
+    )
+    {
         // Validación mejorada
         $this->validateHost($host);
         $this->validatePort($port);
@@ -92,6 +93,7 @@ class CupsClient
             $this->setCredentials($this->username, $this->password);
         }
     }
+
     /**
      * Ejecuta una solicitud con reintentos automáticos
      */
@@ -131,9 +133,10 @@ class CupsClient
         string $printer,
         string $data,
         string $jobName = 'PHP Job',
-        array $options = []
-    ): array {
-        return $this->executeWithRetry(function() use ($printer, $data, $jobName, $options) {
+        array  $options = []
+    ): array
+    {
+        return $this->executeWithRetry(function () use ($printer, $data, $jobName, $options) {
             $this->validatePrinterName($printer);
             $this->validatePrintData($data);
 
@@ -206,12 +209,13 @@ class CupsClient
      * Construcción IPP mejorada con soporte para más tipos de datos
      */
     private function buildIppRequest(
-        string $operation,
+        string  $operation,
         ?string $printer = null,
         ?string $jobName = null,
         ?string $data = null,
-        array $options = []
-    ): string {
+        array   $options = []
+    ): string
+    {
         $request = pack('CC', ...self::IPP_VERSION);
 
         $operationCode = $this->getOperationCode($operation);
@@ -283,7 +287,7 @@ class CupsClient
 
     private function getValueTag(mixed $value): int
     {
-        return match(true) {
+        return match (true) {
             is_int($value) => 0x21,      // integer
             is_bool($value) => 0x22,     // boolean
             $value instanceof DateTime => 0x31, // datetime
@@ -293,7 +297,7 @@ class CupsClient
 
     private function encodeIppValue(int $tag, mixed $value): string
     {
-        return match($tag) {
+        return match ($tag) {
             0x21 => pack('N', (int)$value),  // integer
             0x22 => pack('C', (bool)$value), // boolean
             0x31 => $this->encodeDateTime($value), // datetime
@@ -430,6 +434,7 @@ class CupsClient
             }
         }
     }
+
     private function parseIppResponse(string $response): array
     {
         if (strlen($response) < 8) {
@@ -605,7 +610,7 @@ class CupsClient
     {
         $this->validatePrinterName($printer);
 
-        return $this->executeWithRetry(function() use ($printer) {
+        return $this->executeWithRetry(function () use ($printer) {
             $ippRequest = $this->buildIppRequest('get-printer-attributes', $printer);
             $path = '/printers/' . rawurlencode($printer);
 
@@ -662,7 +667,7 @@ class CupsClient
     {
         $this->validatePrinterName($printer);
 
-        return $this->executeWithRetry(function() use ($printer, $whichJobs) {
+        return $this->executeWithRetry(function () use ($printer, $whichJobs) {
             $ippRequest = $this->buildIppRequest('get-jobs', $printer, null, null, [
                 'which-jobs' => [$whichJobs],
                 'requested-attributes' => [
@@ -708,7 +713,7 @@ class CupsClient
 
     private function getJobState(int $state): string
     {
-        return match($state) {
+        return match ($state) {
             3 => 'pending',
             4 => 'held',
             5 => 'processing',
@@ -742,7 +747,7 @@ class CupsClient
     {
         $this->validatePrinterName($printer);
 
-        return $this->executeWithRetry(function() use ($printer, $jobId) {
+        return $this->executeWithRetry(function () use ($printer, $jobId) {
             $ippRequest = $this->buildIppRequest('cancel-job', $printer, null, null, [
                 'job-id' => [$jobId]
             ]);
@@ -812,24 +817,10 @@ class CupsClient
         }
     }
 
-    private function logRequest(string $method, string $path, $data = null): void
-    {
-        $this->log('debug', "Request: {$method} {$path}", [
-            'data_length' => $data ? strlen($data) : 0
-        ]);
-    }
-
-    private function logResponse(int $statusCode, $body = null): void
-    {
-        $this->log('debug', "Response: {$statusCode}", [
-            'body_length' => $body ? strlen($body) : 0
-        ]);
-    }
-
 #######################################################################
     public function debugAuth(): void
     {
-        if(!$this->debug) {
+        if (!$this->debug) {
             return;
         }
         $this->log('debug', 'Debug Auth');
@@ -916,30 +907,6 @@ class CupsClient
     }
 
     /**
-     * Obtiene el código de operación IPP
-     *
-     * @param string $operation Nombre de la operación
-     * @return int Código de operación
-     * @throws InvalidArgumentException Si la operación no es válida
-     */
-    private function getOperationCode(string $operation): int
-    {
-        $operations = [
-            'print-job' => 0x0002,
-            'get-printers' => 0x0004,
-            'get-jobs' => 0x000A,
-            'get-printer-attributes' => 0x000B,
-            'get-version' => 0x000B, // OJO: revisar según la operación real que quieres usar
-        ];
-
-        if (!isset($operations[$operation])) {
-            throw new InvalidArgumentException("Operación IPP no válida: $operation");
-        }
-
-        return $operations[$operation];
-    }
-
-    /**
      * Convierte el valor IPP según su tipo de dato
      * @param int $tag
      * @param string $value
@@ -980,85 +947,147 @@ class CupsClient
         }
     }
 
-    /**
-     * Obtiene la versión del servidor CUPS
-     * @return string
-     * @throws RuntimeException
-     */
-    public function getVersion(): string
-    {
-        try {
-            // Intentar obtener la versión mediante IPP
-            return $this->getVersionIpp();
-        } catch (RuntimeException $e) {
 
-            try {
-                // Si falla, intentar obtenerla por HTTP
-                return $this->getVersionHttp();
-            } catch (RuntimeException $e) {
-                // Si falla en ambos casos, lanzar la excepción
-                throw new RuntimeException("Error al obtener la versión de CUPS: " . $e->getMessage());
-            }
+
+
+    /**
+     * Obtiene el código de operación IPP
+     *
+     * @param string $operation Nombre de la operación
+     * @return int Código de operación
+     * @throws InvalidArgumentException Si la operación no es válida
+     */// Actualizar el mapeo de operaciones en getOperationCode()
+    private function getOperationCode(string $operation): int
+    {
+        $operations = [
+            'print-job' => 0x0002,
+            'print-uri' => 0x0003,
+            'validate-job' => 0x0004,
+            'create-job' => 0x0005,
+            'send-document' => 0x0006,
+            'send-uri' => 0x0007,
+            'cancel-job' => 0x0008,
+            'get-job-attributes' => 0x0009,
+            'get-jobs' => 0x000A,
+            'get-printer-attributes' => 0x000B,
+            'hold-job' => 0x000C,
+            'release-job' => 0x000D,
+            'restart-job' => 0x000E,
+            'pause-printer' => 0x0010,
+            'resume-printer' => 0x0011,
+            'purge-jobs' => 0x0012,
+            'set-printer-attributes' => 0x0013,
+            'set-job-attributes' => 0x0014,
+            'get-printer-support-values' => 0x0015,
+            'create-printer-subscriptions' => 0x0016,
+            'create-job-subscriptions' => 0x0017,
+            'get-subscription-attributes' => 0x0018,
+            'get-subscriptions' => 0x0019,
+            'renew-subscription' => 0x001A,
+            'cancel-subscription' => 0x001B,
+            'get-notifications' => 0x001C,
+            'send-notifications' => 0x001D,
+            'get-resource-attributes' => 0x001E,
+            'get-resource-data' => 0x001F,
+            'get-resources' => 0x0020,
+            'get-print-support-files' => 0x0021,
+            'enable-printer' => 0x0022,
+            'disable-printer' => 0x0023,
+            'pause-printer-after-current-job' => 0x0024,
+            'hold-new-jobs' => 0x0025,
+            'release-held-new-jobs' => 0x0026,
+            'deactivate-printer' => 0x0027,
+            'activate-printer' => 0x0028,
+            'restart-printer' => 0x0029,
+            'shutdown-printer' => 0x002A,
+            'startup-printer' => 0x002B,
+            'reprocess-job' => 0x002C,
+            'cancel-current-job' => 0x002D,
+            'suspend-current-job' => 0x002E,
+            'resume-job' => 0x002F,
+            'promote-job' => 0x0030,
+            'schedule-job-after' => 0x0031,
+            'cancel-document' => 0x0032,
+            'get-document-attributes' => 0x0033,
+            'get-documents' => 0x0034,
+            'delete-document' => 0x0035,
+            'set-document-attributes' => 0x0036,
+            'cancel-jobs' => 0x0037,
+            'cancel-my-jobs' => 0x0038,
+            'resubmit-job' => 0x0039,
+            'close-job' => 0x003A,
+            'identify-printer' => 0x003B,
+            'validate-document' => 0x003C,
+            // Operaciones CUPS específicas
+            'cups-get-default' => 0x4001,
+            'cups-get-printers' => 0x4002,
+            'cups-add-modify-printer' => 0x4003,
+            'cups-delete-printer' => 0x4004,
+            'cups-get-classes' => 0x4005,
+            'cups-add-modify-class' => 0x4006,
+            'cups-delete-class' => 0x4007,
+            'cups-accept-jobs' => 0x4008,
+            'cups-reject-jobs' => 0x4009,
+            'cups-set-default' => 0x400A,
+            'cups-get-devices' => 0x400B,
+            'cups-get-ppds' => 0x400C,
+            'cups-move-job' => 0x400D,
+            'cups-authenticate-job' => 0x400E,
+            'cups-get-ppd' => 0x400F,
+            'cups-get-document' => 0x4027,
+            'cups-get-document2' => 0x4028,
+            // Para compatibilidad con versiones anteriores
+            'get-printers' => 0x4002, // Alias de cups-get-printers
+        ];
+
+        if (!isset($operations[$operation])) {
+            throw new InvalidArgumentException("Operación IPP no válida: $operation");
         }
+
+        return $operations[$operation];
     }
 
     /**
-     * Obtiene la versión del servidor CUPS mediante IPP
-     *
-     * @return string Versión de CUPS (ej: "2.3.1")
-     * @throws RuntimeException Si no se puede obtener la versión
+     * Obtiene la versión usando get-printer-attributes
      */
-    public function getVersionIpp(): string
+    public function getVersionFromPrinterAttributes(): string
     {
         try {
-            $ippRequest = $this->buildIppRequest('get-version');
-            $this->client->post('/admin/', $ippRequest);
+            // Usar una impresora que sepamos que existe o la default
+            $printers = $this->getPrinters();
+            $printer = $printers[0] ?? null;
+
+            if (!$printer) {
+                throw new RuntimeException("No hay impresoras disponibles para consultar la versión");
+            }
+
+            $ippRequest = $this->buildIppRequest('get-printer-attributes', $printer, null, null, [
+                'requested-attributes' => ['server-version', 'printer-version', 'cups-version']
+            ]);
+
+            $path = '/printers/' . rawurlencode($printer);
+            $this->client->post($path, $ippRequest);
 
             if ($this->client->statusCode !== 200) {
-                throw new RuntimeException("Error al obtener versión: HTTP {$this->client->statusCode}");
+                throw new RuntimeException("Error al obtener atributos: HTTP {$this->client->statusCode}");
             }
 
             $response = $this->parseIppResponse($this->client->body);
 
-            // Buscar el atributo que contiene la versión
-            foreach ($response['attributes'] as $group) {
-                if (isset($group['printer-version'])) {
-                    $version = $group['printer-version'];
-                    return $this->formatIppVersion($version);
-                }
+            // Buscar la versión en la respuesta
+            $version = $this->extractServerVersion($response);
+
+            if ($version) {
+                return $version;
             }
 
-            throw new RuntimeException("No se encontró la versión en la respuesta");
+            throw new RuntimeException("No se encontró la versión en los atributos de la impresora");
+
         } catch (Exception $e) {
-            throw new RuntimeException("Error al obtener versión CUPS: " . $e->getMessage());
+            throw new RuntimeException("Error al obtener versión: " . $e->getMessage());
         }
     }
 
-    /**
-     * Obtiene la versión de CUPS mediante el endpoint HTTP
-     *
-     * @return string Versión de CUPS
-     * @throws RuntimeException Si no se puede obtener la versión
-     */
-    public function getVersionHttp(): string
-    {
-        try {
-            $this->client->get('/');
-
-            if ($this->client->statusCode !== 200) {
-                throw new RuntimeException("Error al obtener versión: HTTP {$this->client->statusCode}");
-            }
-
-            // Buscar en las cabeceras o en el body
-            if (preg_match('/CUPS\/([\d.]+)/i', $this->client->body, $matches)) {
-                return $matches[1];
-            }
-
-            throw new RuntimeException("No se encontró la versión en la respuesta HTTP");
-        } catch (Exception $e) {
-            throw new RuntimeException("Error al obtener versión CUPS via HTTP: " . $e->getMessage());
-        }
-    }
 
     /**
      * Formatea la versión IPP (16 bits) a versión legible
@@ -1072,6 +1101,239 @@ class CupsClient
 
         return "$major.$minor.$patch";
     }
+
+
+    /**
+     * Método principal para obtener la versión
+     */
+    public function getVersion(): string
+    {
+        $methods = [
+            'http' => $this->getVersionHttp(...),           // Más rápido
+            'attributes' => $this->getVersionFromPrinterAttributes(...), // Más preciso
+            'any-printer' => $this->getVersionFromAnyPrinter(...),      // Fallback
+            'system' => $this->getVersionFromSystem(...)           // Último recurso
+        ];
+
+        $exceptions = [];
+
+        foreach ($methods as $method => $callable) {
+            try {
+                $version = $callable();
+                if ($version && $version !== 'unknown') {
+                    return $version;
+                }
+            } catch (Exception $e) {
+                $exceptions[] = "{$method}: {$e->getMessage()}";
+                continue;
+            }
+        }
+
+        throw new RuntimeException(
+            "No se pudo obtener la versión de CUPS por ningún método. Errores: " .
+            implode('; ', $exceptions)
+        );
+    }
+
+    /**
+     * Intenta obtener la versión de cualquier impresora disponible
+     */
+    private function getVersionFromAnyPrinter(): string
+    {
+        // Obtener lista de impresoras sin lanzar excepción
+        try {
+            $printers = $this->getPrintersViaSystem();
+        } catch (Exception $e) {
+            // Si no podemos obtener impresoras, usar un nombre común
+            $printers = ['default', 'lp', 'raw'];
+        }
+
+        foreach ($printers as $printer) {
+            try {
+                return $this->getVersionFromPrinter($printer);
+            } catch (Exception $e) {
+                continue;
+            }
+        }
+
+        throw new RuntimeException("No se pudo obtener versión de ninguna impresora");
+    }
+
+    /**
+     * Obtiene versión de una impresora específica
+     */
+    private function getVersionFromPrinter(string $printer): string
+    {
+        $ippRequest = $this->buildIppRequest('get-printer-attributes', $printer);
+
+        $this->client->post('/printers/' . rawurlencode($printer), $ippRequest);
+
+        if ($this->client->statusCode === 200) {
+            $response = $this->parseIppResponse($this->client->body);
+            $version = $this->extractServerVersion($response);
+
+            if ($version) {
+                return $version;
+            }
+        }
+
+        throw new RuntimeException("No se encontró versión en {$printer}");
+    }
+
+    /**
+     * Obtiene versión usando comandos del sistema (último recurso)
+     */
+    private function getVersionFromSystem(): string
+    {
+        $commands = [
+            'cups-config --version 2>/dev/null',
+            'lpstat -V 2>/dev/null',
+            'dpkg -l cups 2>/dev/null | grep cups | awk \'{print $3}\'',
+            'rpm -q cups --qf "%{VERSION}\n" 2>/dev/null',
+        ];
+
+        foreach ($commands as $command) {
+            $output = shell_exec($command);
+            if ($output && preg_match('/(\d+\.\d+(?:\.\d+)?)/', $output, $matches)) {
+                return $matches[1];
+            }
+        }
+
+        throw new RuntimeException("No se pudo obtener versión del sistema");
+    }
+
+    /**
+     * Versión HTTP mejorada
+     */
+    private function getVersionHttp(): string
+    {
+        try {
+            $this->client->get('/');
+
+            if ($this->client->statusCode === 200) {
+                // Buscar en múltiples lugares
+                $patterns = [
+                    '/CUPS\/([\d.]+)/i',
+                    '/Server:\s*CUPS\/([\d.]+)/i',
+                    '/cups-version[:\s]+([\d.]+)/i',
+                    '/version[:\s]+([\d.]+)/i',
+                ];
+
+                foreach ($patterns as $pattern) {
+                    if (preg_match($pattern, $this->client->body, $matches)) {
+                        return $matches[1];
+                    }
+                }
+
+                // Buscar en headers
+                $serverHeader = $this->client->headers['server'] ?? '';
+                if (preg_match('/CUPS\/([\d.]+)/', $serverHeader, $matches)) {
+                    return $matches[1];
+                }
+            }
+
+            throw new RuntimeException("No se encontró versión en respuesta HTTP");
+
+        } catch (Exception $e) {
+            throw new RuntimeException("Error HTTP: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Extrae la versión del servidor de una respuesta IPP
+     */
+    private function extractServerVersion(array $response): ?string
+    {
+        // Buscar en diferentes ubicaciones posibles
+        $searchPaths = [
+            ['attributes', 'printer-attributes', 'server-version'],
+            ['attributes', 'operation-attributes', 'server-version'],
+            ['attributes', 'server-version'],
+            ['attributes', 'cups-version'],
+        ];
+
+        foreach ($searchPaths as $path) {
+            $value = $this->getNestedValue($response, $path);
+            if ($value) {
+                return $this->formatVersionString($value);
+            }
+        }
+
+        // Si no encontramos versión explícita, intentar inferir de la versión IPP
+        if (isset($response['version'])) {
+            // CUPS suele usar IPP 2.0+ para CUPS 1.4+, IPP 2.1 para CUPS 1.5+, etc.
+            return $this->inferCupsVersionFromIppVersion($response['version']);
+        }
+
+        return null;
+    }
+
+    /**
+     * Obtiene un valor anidado de un array por ruta
+     */
+    private function getNestedValue(array $array, array $path): mixed
+    {
+        $current = $array;
+        foreach ($path as $key) {
+            if (!is_array($current) || !array_key_exists($key, $current)) {
+                return null;
+            }
+            $current = $current[$key];
+        }
+        return $current;
+    }
+
+    /**
+     * Formatea diferentes representaciones de versión a string estándar
+     */
+    private function formatVersionString(mixed $version): string
+    {
+        if (is_string($version)) {
+            // Ya es string, verificar formato
+            if (preg_match('/^(\d+\.)?(\d+\.)?(\d+)$/', $version)) {
+                return $version;
+            }
+            // Intentar extraer versión de string como "CUPS v2.3.1"
+            if (preg_match('/(\d+\.\d+(?:\.\d+)?)/', $version, $matches)) {
+                return $matches[1];
+            }
+        }
+
+        if (is_int($version)) {
+            return $this->formatIppVersion($version);
+        }
+
+        if (is_array($version) && isset($version['value'])) {
+            return $this->formatVersionString($version['value']);
+        }
+
+        return (string)$version;
+    }
+
+    /**
+     * Infiere la versión de CUPS basada en la versión IPP soportada
+     */
+    private function inferCupsVersionFromIppVersion(string $ippVersion): string
+    {
+        $versionMap = [
+            '1.0' => '1.1',
+            '1.1' => '1.2',
+            '2.0' => '1.4',
+            '2.1' => '1.5',
+            '2.2' => '1.6',
+            '2.3' => '2.0',
+            '2.4' => '2.2',
+        ];
+
+        // Extraer major.minor
+        if (preg_match('/^(\d+\.\d+)/', $ippVersion, $matches)) {
+            $baseVersion = $matches[1];
+            return $versionMap[$baseVersion] ?? '2.0+';
+        }
+
+        return 'unknown';
+    }
+
 
     /**
      * Destructor de la clase CupsClient
