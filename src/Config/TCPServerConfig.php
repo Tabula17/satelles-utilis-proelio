@@ -22,6 +22,9 @@ class TCPServerConfig extends AbstractDescriptor
      * @var string $host
      */
     protected(set) string $host = 'localhost' {
+        /**
+         * @throws InvalidArgumentException
+         */
         set(string $host) {
             if (empty($host)) {
                 throw new InvalidArgumentException('El host no puede estar vacío');
@@ -77,6 +80,58 @@ class TCPServerConfig extends AbstractDescriptor
      * An associative array used to store configuration options -> https://wiki.swoole.com/en/#/server/setting
      * @var array $options
      */
-    protected(set) ?array $options = [];
-    protected(set) ?TCPSSLConfig $ssl;
+    protected(set) array $options = [];
+    protected(set) ?TCPSSLConfig $ssl {
+        set(TCPSSLConfig|array|null $value) {
+            if ($value instanceof TCPSSLConfig) {
+                $this->ssl = $value;
+            } else {
+                $this->ssl = TCPSSLConfig::fromArray($value);
+            }
+        }
+    }
+
+    public function __construct(
+        string        $host = 'localhost',
+        ?int          $port = null,
+        int           $mode = SWOOLE_PROCESS,
+        int           $type = SWOOLE_SOCK_TCP,
+        ?array        $options = null,
+        ?TCPSSLConfig $ssl = null
+    )
+    {
+        $this->host = $host;
+        $this->port = $port;
+        $this->mode = $mode;
+        $this->type = $type;
+        $this->options = $options ?? [];
+        $this->ssl = $ssl;
+
+        parent::__construct();
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function validate(): void
+    {
+        if (empty($this->host)) {
+            throw new InvalidArgumentException('El host no puede estar vacío');
+        }
+        if ($this->port !== null && ($this->port < 1 || $this->port > 65535)) {
+            throw new InvalidArgumentException('El puerto debe estar entre 1 y 65535');
+        }
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function set(string|array|TCPSSLConfig|int|float|bool|null $property, mixed $value): void
+    {
+        if ($property === 'ssl' && !($value instanceof TCPSSLConfig) && !is_array($value)) {
+            throw new InvalidArgumentException('La configuración SSL debe ser una instancia de TCPSSLConfig o un array');
+        }
+        parent::set($property, $value);
+    }
+
 }

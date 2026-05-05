@@ -239,4 +239,12 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         $this->loadProperties($this->__serialize());
     }
 
+    public static function fromArray(array $config): static
+    {
+        $instance = new static();
+        foreach ($config as $key => $value) {
+            $instance->set($key, $value);
+        }
+        return $instance;
+    }
 }

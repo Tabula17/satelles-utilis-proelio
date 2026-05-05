@@ -69,8 +69,12 @@ abstract class TypedCollection extends GenericCollection
             return $value;
         }
         try {
-            return new $class($value);
-        } catch (\Throwable $e) {
+            try {
+                return new $class($value);
+            } catch (Throwable $ignored) {
+                return new $class(...(is_array($value) ? $value : [$value]));
+            }
+        } catch (Throwable $e) {
             throw new UnexpectedValueException("Unable to instantiate $class from value", 0, $e);
         }
     }
@@ -86,7 +90,7 @@ abstract class TypedCollection extends GenericCollection
         foreach ($config as $key => $item) {
             try {
                 $values[$key] = static::cast($item);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 continue;
             }
         }
