@@ -86,7 +86,7 @@ class TCPServerConfig extends AbstractDescriptor
             if ($value instanceof TCPSSLConfig) {
                 $this->ssl = $value;
             } else {
-                $this->ssl = TCPSSLConfig::fromArray($value);
+                $this->ssl = TCPSSLConfig::fromArray($value ?? []);
             }
         }
     }
