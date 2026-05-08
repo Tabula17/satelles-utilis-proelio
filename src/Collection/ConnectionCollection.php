@@ -64,7 +64,7 @@ class ConnectionCollection extends TypedCollection
      */
     public function reachableConnections(): static
     {
-        return new static(array_filter($this->values, static fn(ConnectionConfig $config) => $config->canConnect()));
+        return new static(...array_filter($this->values, static fn(ConnectionConfig $config) => $config->canConnect()));
     }
 
     /**
@@ -72,6 +72,6 @@ class ConnectionCollection extends TypedCollection
      */
     public function unreachableConnections(): static
     {
-        return new static(array_filter($this->values, static fn(ConnectionConfig $config) => !$config->canConnect()));
+        return new static(...array_filter($this->values, static fn(ConnectionConfig $config) => !$config->canConnect()));
     }
 }
