@@ -3,17 +3,18 @@
 namespace Tabula17\Satelles\Utilis\Collection;
 
 use Tabula17\Satelles\Utilis\Config\ConnectionConfig;
+use Tabula17\Satelles\Utilis\Exception\UnexpectedValueException;
 
 /**
  * Represents a collection of ConnectionConfig objects with utility methods for finding, filtering,
  * and removing configurations based on specific criteria. This class ensures that only
  * ConnectionConfig objects are added to the collection.
  */
-
 class ConnectionCollection extends TypedCollection
 {
 
     public static string $type = ConnectionConfig::class;
+
     /**
      * @param string $name
      * @return ConnectionConfig|null
@@ -22,6 +23,7 @@ class ConnectionCollection extends TypedCollection
     {
         return $this->findBy('name', $name);
     }
+
     public function removeByName(string $name): void
     {
         $this->removeBy('name', $name);
@@ -41,10 +43,12 @@ class ConnectionCollection extends TypedCollection
     {
         return $this->filter(fn(ConnectionConfig $config) => $config->$key === $value);
     }
+
     public function removeBy(string $key, mixed $value): void
     {
         $this->remove($this->findBy($key, $value));
     }
+
     public function collect(string $key): array
     {
         return array_filter(array_map(static fn(ConnectionConfig $config) => $config->$key, $this->values));
@@ -53,5 +57,21 @@ class ConnectionCollection extends TypedCollection
     protected static function getType(): string
     {
         return static::$type;
+    }
+
+    /**
+     * @throws UnexpectedValueException
+     */
+    public function reachableConnections(): static
+    {
+        return new static(array_filter($this->values, static fn(ConnectionConfig $config) => $config->canConnect()));
+    }
+
+    /**
+     * @throws UnexpectedValueException
+     */
+    public function unreachableConnections(): static
+    {
+        return new static(array_filter($this->values, static fn(ConnectionConfig $config) => !$config->canConnect()));
     }
 }
