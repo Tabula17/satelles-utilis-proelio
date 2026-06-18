@@ -126,7 +126,7 @@ class TCPServerConfig extends AbstractDescriptor
     /**
      * @throws InvalidArgumentException
      */
-    public function set(string|array|TCPSSLConfig|int|float|bool|null $property, mixed $value): void
+    public function set(string $property, mixed $value): void
     {
         if ($property === 'ssl' && !($value instanceof TCPSSLConfig) && !is_array($value)) {
             throw new InvalidArgumentException('La configuración SSL debe ser una instancia de TCPSSLConfig o un array');
