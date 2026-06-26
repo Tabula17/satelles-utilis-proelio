@@ -20,34 +20,46 @@ class ConnectionConfig extends AbstractDescriptor
             $this->configId = uniqid($name . '::', false);
         }
     }
+
     /**
      * The host address or IP of the database server.
      * @var string $host
      */
     protected(set) string $host = 'localhost' {
-        set(string $host) {
-            if (empty($host)) {
-                throw new InvalidArgumentException(ExceptionDefinitions::HOST_CANNOT_BE_EMPTY->value);
+        /**
+         * @throws InvalidArgumentException
+         */
+        set {
+            $cleanedHost = trim($value);
+
+            // 1. Validar que no esté vacío
+            if ($cleanedHost === '') {
+                throw new InvalidArgumentException('El host no puede estar vacío');
             }
-            if ($host === 'localhost' || filter_var($host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) ||
-                filter_var($host, FILTER_VALIDATE_IP)) {
-                $this->host = $host;
-            } else {
-                throw new InvalidArgumentException(sprintf(ExceptionDefinitions::HOST_INVALID->value, $host));
+
+            // 2. Validar si es un dominio/hostname válido OR una IP válida
+            if (filter_var($cleanedHost, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) ||
+                filter_var($cleanedHost, FILTER_VALIDATE_IP)) {
+                $this->host = $cleanedHost;
+                return; // Salida temprana si es exitoso
             }
+
+            // 3. Fallback de error
+            throw new InvalidArgumentException(sprintf('El formato de host "%s" es inválido', $value));
         }
     }
+
     /**
      * The port number used to connect to the database server.
      * @var int|null $port
      */
-    protected(set) ?int $port {
-        set(?int $port) {
-            if ($port !== null && ($port < 1 || $port > 65535)) {
-                throw new InvalidArgumentException(ExceptionDefinitions::PORT_INVALID->value);
-            }
-            $this->port = $port;
-        }
+    protected(set) ?int $port = null {
+        /**
+         * @throws InvalidArgumentException
+         */
+        set(?int $value) => ($value !== null && ($value < 1 || $value > 65535))
+            ? throw new InvalidArgumentException('El puerto debe estar entre 1 y 65535')
+            : $this->port = $value;
     }
     /**
      * The username used to authenticate with the database server.

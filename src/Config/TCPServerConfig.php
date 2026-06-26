@@ -25,56 +25,55 @@ class TCPServerConfig extends AbstractDescriptor
         /**
          * @throws InvalidArgumentException
          */
-        set(string $host) {
-            if (empty($host)) {
+        set {
+            $cleanedHost = trim($value);
+
+            // 1. Validar que no esté vacío
+            if ($cleanedHost === '') {
                 throw new InvalidArgumentException('El host no puede estar vacío');
             }
-            if ($host === 'localhost' || filter_var($host, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) ||
-                filter_var($host, FILTER_VALIDATE_IP)) {
-                $this->host = $host;
-            } else {
-                throw new InvalidArgumentException(sprintf('El formato de host "%s" es inválido', $host));
+
+            // 2. Validar si es un dominio/hostname válido OR una IP válida
+            if (filter_var($cleanedHost, FILTER_VALIDATE_DOMAIN, FILTER_FLAG_HOSTNAME) ||
+                filter_var($cleanedHost, FILTER_VALIDATE_IP)) {
+                $this->host = $cleanedHost;
+                return; // Salida temprana si es exitoso
             }
+
+            // 3. Fallback de error
+            throw new InvalidArgumentException(sprintf('El formato de host "%s" es inválido', $value));
         }
     }
+
     /**
      * The port number used to connect to the database server.
      * @var int|null $port
      */
-    protected(set) ?int $port {
-        set(?int $port) {
-            if ($port !== null && ($port < 1 || $port > 65535)) {
-                throw new InvalidArgumentException('El puerto debe estar entre 1 y 65535');
-            }
-            $this->port = $port;
-        }
+    protected(set) ?int $port = null {
+        /**
+         * @throws InvalidArgumentException
+         */
+        set(?int $value) => ($value !== null && ($value < 1 || $value > 65535))
+            ? throw new InvalidArgumentException('El puerto debe estar entre 1 y 65535')
+            : $this->port = $value;
     }
     protected(set) int $mode = SWOOLE_PROCESS {
-        set {
-            $valid = [SWOOLE_PROCESS, SWOOLE_BASE];
-            if (!in_array($value, $valid, true)) {
-                $this->mode = SWOOLE_PROCESS;
-            } else {
-                $this->mode = $value;
-            }
-        }
+        set => $this->type = match ($value) {
+            SWOOLE_BASE,
+            SWOOLE_PROCESS => $value,
+            default => SWOOLE_PROCESS,
+        };
     }
     protected(set) int $type = SWOOLE_SOCK_TCP {
-        set {
-            $valid = [
-                SWOOLE_SOCK_TCP,
-                SWOOLE_SOCK_TCP6,
-                SWOOLE_SOCK_UDP,
-                SWOOLE_SOCK_UDP6,
-                SWOOLE_SOCK_UNIX_DGRAM,
-                SWOOLE_SOCK_UNIX_STREAM
-            ];
-            if (!in_array($value, $valid, true)) {
-                $this->type = SWOOLE_SOCK_TCP;
-            } else {
-                $this->type = $value;
-            }
-        }
+        set => $this->type = match ($value) {
+            SWOOLE_SOCK_TCP,
+            SWOOLE_SOCK_TCP6,
+            SWOOLE_SOCK_UDP,
+            SWOOLE_SOCK_UDP6,
+            SWOOLE_SOCK_UNIX_DGRAM,
+            SWOOLE_SOCK_UNIX_STREAM => $value,
+            default => SWOOLE_SOCK_TCP,
+        };
     }
     /**
      * An associative array used to store configuration options -> https://wiki.swoole.com/en/#/server/setting

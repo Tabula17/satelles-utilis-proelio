@@ -53,7 +53,7 @@ class RedisConfig extends ConnectionConfig
 
     // See PHP stream options for valid SSL configuration settings.
     protected(set) ?array $ssl {
-        set(SSLStreamConfig|array|null $value){
+        set(SSLStreamConfig|array|null $value) {
             if ($value instanceof SSLStreamConfig) {
                 $this->ssl = $value->toArray();
             } else {
@@ -75,28 +75,30 @@ class RedisConfig extends ConnectionConfig
     // 'base', and 'cap' are in milliseconds and represent the first
     // delay redis will use when reconnecting, and the maximum delay
     // we will reach while retrying.
-    protected(set) ?array $backoff {
+    protected(set) ?array $backoff = null {
         set {
-            if (is_array($value)) {
-                if (isset($value['algorithm'])) {
-                    $algorithms = [
-                        Redis::BACKOFF_ALGORITHM_DEFAULT,
-                        Redis::BACKOFF_ALGORITHM_CONSTANT,
-                        Redis::BACKOFF_ALGORITHM_UNIFORM,
-                        Redis::BACKOFF_ALGORITHM_EXPONENTIAL,
-                        Redis::BACKOFF_ALGORITHM_FULL_JITTER,
-                        Redis::BACKOFF_ALGORITHM_EQUAL_JITTER,
-                        Redis::BACKOFF_ALGORITHM_DECORRELATED_JITTER
-                    ];
-                    if (!in_array($value['algorithm'], $algorithms)) {
-                        unset($value['algorithm']);
-                    }
-                }
-                if(count($value)> 0) {
-                    $this->backoff = $value;
-                }
+            // Si es nulo o no es un arreglo válido para Redis, lo reseteamos a null
+            if (!is_array($value) || !isset($value['algorithm'])) {
+                $this->backoff = null;
+                return;
             }
+
+            // Validamos el algoritmo usando match (nativo, estricto y rápido)
+            $isValidAlgorithm = match ($value['algorithm']) {
+                Redis::BACKOFF_ALGORITHM_DEFAULT,
+                Redis::BACKOFF_ALGORITHM_CONSTANT,
+                Redis::BACKOFF_ALGORITHM_UNIFORM,
+                Redis::BACKOFF_ALGORITHM_EXPONENTIAL,
+                Redis::BACKOFF_ALGORITHM_FULL_JITTER,
+                Redis::BACKOFF_ALGORITHM_EQUAL_JITTER,
+                Redis::BACKOFF_ALGORITHM_DECORRELATED_JITTER => true,
+                default => false,
+            };
+
+            // Si el algoritmo es válido, asignamos el arreglo completo; si no, queda en null
+            $this->backoff = $isValidAlgorithm ? $value : null;
         }
     }
+
 
 }
