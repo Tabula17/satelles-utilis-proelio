@@ -170,28 +170,22 @@ class ConnectionConfig extends AbstractDescriptor
             ]);
             $host = $this->host;
             $port = $this->port;
-            $scheme = 'tcp';
-            if ($scheme === 'https') {
-                $context = stream_context_create([
-                    'ssl' => [
-                        'verify_peer' => false,
-                        'verify_peer_name' => false,
-                        'allow_self_signed' => true
-                    ]
-                ]);
-                if (!$this->port) {
-                    $this->port = 443;
+            $scheme = $this->protocol;
+            if (strpos($scheme, 'http') === 0) {
+                // Determinar el puerto por defecto según el protocolo si no está explícito
+                if ($scheme === 'https') {
+                    $context = stream_context_create([
+                        'ssl' => [
+                            'verify_peer' => false,
+                            'verify_peer_name' => false,
+                            'allow_self_signed' => true
+                        ]
+                    ]);
+                    if (!$port) {
+                        $port = 443;
+                    }
                 }
-            }
-            if (filter_var($host, FILTER_VALIDATE_URL) || strpos($host, 'http') === 0) {
-                $parts = parse_url($host);
-
-                if (isset($parts['host'])) {
-                    $host = $parts['host'];
-                    // Determinar el puerto por defecto según el protocolo si no está explícito
-                    $scheme = isset($parts['scheme']) && $parts['scheme'] === 'https' ? 'ssl' : 'tcp';
-                    $port = $parts['port'] ?? ($scheme === 'ssl' ? 443 : 80);
-                }
+                $scheme = $scheme === 'https' ? 'ssl' : 'tcp';
             } else {
                 // Si es una conexión TCP tradicional por propiedades, ajustamos el esquema si es puerto 443
                 $scheme = ($port === 443) ? 'ssl' : 'tcp';
