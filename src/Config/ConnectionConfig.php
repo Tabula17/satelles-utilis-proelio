@@ -170,7 +170,7 @@ class ConnectionConfig extends AbstractDescriptor
             ]);
             $time = microtime(true);
             $socket = @stream_socket_client(
-                "tcp://{$this->host}:{$this->port}",
+                "{$this->protocol}://{$this->host}:{$this->port}",
                 $errno,
                 $errstr,
                 1, // timeout
