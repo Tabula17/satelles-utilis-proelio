@@ -8,7 +8,6 @@ use Throwable;
 
 class MimeCollection extends TypedEnumCollection
 {
-
     protected static function getEnumType(): string
     {
         return MimeTypes::class;
