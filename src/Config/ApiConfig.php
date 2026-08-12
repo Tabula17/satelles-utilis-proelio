@@ -6,14 +6,14 @@ use Swoole\Coroutine\Http\Client;
 
 class ApiConfig extends ConnectionConfig
 {
-    public string $basePath = '/';
-    public string $method = 'GET';
-    public string $protocol = 'http';
-    public array $headers = [
+    protected(set) string $basePath = '/';
+    protected(set) string $method = 'GET';
+    protected(set) string $protocol = 'http';
+    protected(set) array $headers = [
         "Accept" => "application/json",
         "Content-Type" => "application/json"
     ];
-    public int $timeout = 30;
+    protected(set) int $timeout = 30;
 
     public function httpClient(): Client
     {

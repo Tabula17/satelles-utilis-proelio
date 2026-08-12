@@ -20,6 +20,7 @@ class ConnectionConfig extends AbstractDescriptor
             $this->configId = uniqid($name . '::', false);
         }
     }
+    protected(set) string $protocol = 'tcp';
 
     /**
      * The host address or IP of the database server.
