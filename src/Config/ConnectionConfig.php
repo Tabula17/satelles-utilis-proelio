@@ -168,6 +168,18 @@ class ConnectionConfig extends AbstractDescriptor
                 'socket' => ['tcp_nodelay' => true],
                 'ssl' => ['verify_peer' => false, 'verify_peer_name' => false]
             ]);
+            if ($this->protocl === 'https') {
+                $context = stream_context_create([
+                    'ssl' => [
+                        'verify_peer' => false,
+                        'verify_peer_name' => false,
+                        'allow_self_signed' => true
+                    ]
+                ]);
+                if (!$this->port) {
+                    $this->port = 443;
+                }
+            }
             $time = microtime(true);
             $socket = @stream_socket_client(
                 "{$this->protocol}://{$this->host}:{$this->port}",
