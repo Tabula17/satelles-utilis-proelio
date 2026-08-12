@@ -17,7 +17,7 @@ class ApiConfig extends ConnectionConfig
 
     public function httpClient(): Client
     {
-        $client = new Client($this->host . $this->basePath, $this->port);
+        $client = new Client($this->protocol . '://' . $this->host . $this->basePath);
         $client->set([
             'timeout' => $this->timeout
         ]);
