@@ -7,6 +7,8 @@ use Swoole\Coroutine\Http\Client;
 class ApiConfig extends ConnectionConfig
 {
     public string $basePath = '/';
+    public string $method = 'GET';
+    public string $protocol = 'http';
     public array $headers = [
         "Accept" => "application/json",
         "Content-Type" => "application/json"
