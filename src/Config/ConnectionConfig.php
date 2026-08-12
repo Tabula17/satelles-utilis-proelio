@@ -168,7 +168,10 @@ class ConnectionConfig extends AbstractDescriptor
                 'socket' => ['tcp_nodelay' => true],
                 'ssl' => ['verify_peer' => false, 'verify_peer_name' => false]
             ]);
-            if ($this->protocl === 'https') {
+            $host = $this->host;
+            $port = $this->port;
+            $scheme = 'tcp';
+            if ($scheme === 'https') {
                 $context = stream_context_create([
                     'ssl' => [
                         'verify_peer' => false,
@@ -180,9 +183,24 @@ class ConnectionConfig extends AbstractDescriptor
                     $this->port = 443;
                 }
             }
+            if (filter_var($host, FILTER_VALIDATE_URL) || strpos($host, 'http') === 0) {
+                $parts = parse_url($host);
+
+                if (isset($parts['host'])) {
+                    $host = $parts['host'];
+                    // Determinar el puerto por defecto según el protocolo si no está explícito
+                    $scheme = isset($parts['scheme']) && $parts['scheme'] === 'https' ? 'ssl' : 'tcp';
+                    $port = $parts['port'] ?? ($scheme === 'ssl' ? 443 : 80);
+                }
+            } else {
+                // Si es una conexión TCP tradicional por propiedades, ajustamos el esquema si es puerto 443
+                $scheme = ($port === 443) ? 'ssl' : 'tcp';
+            }
+
+
             $time = microtime(true);
             $socket = @stream_socket_client(
-                "{$this->protocol}://{$this->host}:{$this->port}",
+                "{$scheme}://{$host}:{$port}",
                 $errno,
                 $errstr,
                 1, // timeout
