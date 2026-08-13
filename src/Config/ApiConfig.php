@@ -8,11 +8,12 @@ class ApiConfig extends ConnectionConfig
 {
     protected(set) string $basePath = '/';
     protected(set) string $method = 'GET';
-    protected(set) string $protocol = 'http';
+    public string $protocol = 'http';
     protected(set) array $headers = [
         "Accept" => "application/json",
         "Content-Type" => "application/json"
     ];
+    protected(set) array $apiPaths = [];
     protected(set) int $timeout = 30;
 
     public function httpClient(): Client
