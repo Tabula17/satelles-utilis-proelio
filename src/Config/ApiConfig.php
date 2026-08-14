@@ -34,6 +34,6 @@ class ApiConfig extends ConnectionConfig
 
     public function getEndpointFor(string $endpoint): string
     {
-        return $this->host . $this->basePath . ltrim(($this->apiPaths[$endpoint] ?? ''), '/');
+        return $this->protocol . '://' . $this->host . $this->basePath . ltrim(($this->apiPaths[$endpoint] ?? ''), '/');
     }
 }
