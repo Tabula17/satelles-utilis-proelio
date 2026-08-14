@@ -6,7 +6,12 @@ use Swoole\Coroutine\Http\Client;
 
 class ApiConfig extends ConnectionConfig
 {
-    protected(set) string $basePath = '/';
+    protected(set) string $basePath = '/'
+        {
+            get {
+                return '/' . ltrim($this->basePath, '/');
+            }
+        }
     protected(set) string $method = 'GET';
     public string $protocol = 'http';
     protected(set) array $headers = [
@@ -27,4 +32,8 @@ class ApiConfig extends ConnectionConfig
 
     }
 
+    public function getEndpointFor(string $endpoint): string
+    {
+        return $this->host . $this->basePath . ltrim(($this->apiPaths[$endpoint] ?? ''), '/');
+    }
 }
