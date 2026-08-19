@@ -20,6 +20,7 @@ class ApiConfig extends ConnectionConfig
     ];
     protected(set) array $apiPaths = [];
     protected(set) int $timeout = 30;
+    protected(set) ?string $apiKey;
 
     public function httpClient(): Client
     {
@@ -35,5 +36,10 @@ class ApiConfig extends ConnectionConfig
     public function getEndpointFor(string $endpoint): string
     {
         return $this->protocol . '://' . $this->host . $this->basePath . ltrim(($this->apiPaths[$endpoint] ?? ''), '/');
+    }
+
+    public function getAvailableEndpoints(): array
+    {
+        return array_keys($this->apiPaths);
     }
 }
