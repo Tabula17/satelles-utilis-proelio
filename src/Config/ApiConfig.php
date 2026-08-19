@@ -17,7 +17,12 @@ class ApiConfig extends ConnectionConfig
     protected(set) array $headers = [
         "Accept" => "application/json",
         "Content-Type" => "application/json"
-    ];
+    ]
+        {
+            get {
+                return array_map(static fn($value, $key) => str_contains($value, ":") ? ucfirst($value) : "$key: $value", $this->headers, array_keys($this->headers));
+            }
+        }
     protected(set) array $apiPaths = [];
     protected(set) int $timeout = 30;
     protected(set) ?string $apiKey;
