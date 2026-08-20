@@ -66,6 +66,6 @@ class ApiPathConfig extends AbstractDescriptor
 
     public function getEndpoint(string $baseUrl = '', bool $withParamPath = false, bool $onlyValid = true): string
     {
-        return $baseUrl . $this->path . ($withParamPath && $this->pathParams ? $this->getPathParamsString($onlyValid) : '');
+        return rtrim($baseUrl, '/') . $this->path . ($withParamPath && $this->pathParams ? $this->getPathParamsString($onlyValid) : '');
     }
 }
