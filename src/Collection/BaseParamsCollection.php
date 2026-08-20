@@ -33,11 +33,34 @@ class BaseParamsCollection extends TypedCollection
         return $this->sort(fn(BaseParamConfig $a, BaseParamConfig $b) => $a->$key <=> $b->$key);
     }
 
-    public function getValues(): array
+    public function getValidParams(): self
     {
         $validParams = $this->filter(fn(BaseParamConfig $config) => $config->required || isset($config->value));
         $validParams->sortBy('position');
-        return $validParams->map(fn(BaseParamConfig $config) => [$config->name => $config->value]);
+        return $validParams;
+    }
+
+    public function getParams(): self
+    {
+        $this->sortBy('position');
+        return $this;
+    }
+
+    public function getValues(bool $onlyValid = true): array
+    {
+        return ($onlyValid ? $this->getValidParams() : $this->getParams())?->map(fn(BaseParamConfig $config) => [$config->name => $config->value]) ?? [];
+    }
+
+    public function getPlaceholders(bool $onlyValid = true): array
+    {
+        return ($onlyValid ? $this->getValidParams() : $this->getParams())?->map(fn(BaseParamConfig $config) => [$config->name => $config->placeholder]) ?? [];
+    }
+
+    public function setPlaceholderMask(string $mask): void
+    {
+        foreach ($this->values as $param) {
+            $param->setPlaceholderMask($mask);
+        }
     }
 
     public function getRequired(): self

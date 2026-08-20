@@ -3,7 +3,6 @@
 namespace Tabula17\Satelles\Utilis\Config;
 
 use Tabula17\Satelles\Utilis\Collection\BaseParamsCollection;
-use Tabula17\Satelles\Utilis\Config\AbstractDescriptor;
 
 class ApiPathConfig extends AbstractDescriptor
 {
@@ -30,19 +29,43 @@ class ApiPathConfig extends AbstractDescriptor
         }
     protected(set) bool $requiresAuth = false;
     protected(set) bool $pathParams = false;
+
+    protected(set) string $placeholder = ':%%name%%'; //{%%name%%} // etc ;
     protected(set) BaseParamsCollection $params
         {
             set (BaseParamsCollection|array $value) {
                 if (is_array($value)) {
                     $value = BaseParamsCollection::fromArray($value);
                 }
+                $value->setPlaceholderMask($this->placeholder);
                 $this->params = $value;
             }
             get {
                 if (!isset($this->params)) {
                     $this->params = new BaseParamsCollection();
+                    $this->params->setPlaceholderMask($this->placeholder);
                 }
                 return $this->params;
             }
         }
+
+    public function getQueryString(bool $onlyValid = true): string
+    {
+        return http_build_query($this->params->getValues($onlyValid));
+    }
+
+    public function getQueryStringWithPlaceholder(bool $onlyValid = true): string
+    {
+        return http_build_query($this->params->getPlaceholders($onlyValid));
+    }
+
+    public function getPathParamsString(bool $onlyValid = true): string
+    {
+        return implode('/', $this->params->getPlaceholders($onlyValid));
+    }
+
+    public function getEndpoint(string $baseUrl = '', bool $withParamPath = false, bool $onlyValid = true): string
+    {
+        return $baseUrl . $this->path . ($withParamPath && $this->pathParams ? $this->getPathParamsString($onlyValid) : '');
+    }
 }

@@ -52,4 +52,22 @@ class BaseParamConfig extends AbstractDescriptor
         }
     protected Closure $prepareValue;
     protected(set) int $position = 0;
+
+    public string $placeholder {
+        get => str_replace('%%name%%', $this->name, $this->placeHolderMask);
+    }
+    private string $placeHolderMask = ':%%name%%'
+        {
+            set {
+                if (!str_contains($value, '%%name%%')) {
+                    throw new UnexpectedValueException('El placeholder debe contener el token %%name%%');
+                }
+                $this->placeHolderMask = $value;
+            }
+        }
+
+    public function setPlaceholderMask(string $placeholder): void
+    {
+        $this->placeHolderMask = $placeholder;
+    }
 }
