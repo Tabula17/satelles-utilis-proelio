@@ -40,7 +40,7 @@ class ApiConfig extends ConnectionConfig
                 $this->headers = $value;
             }
             get {
-                return array_map(static fn($value, $key) => str_contains(is_callable($value) ? $value() : $value, ":") ? ucfirst($value) : "$key: $value", $this->headers ?? []);
+                return array_map(static fn($value, $key) => str_contains(is_callable($value) ? $value() : $value, ":") ? ucfirst($value) : "$key: $value", $this->headers, array_keys($this->headers));
             }
         }
     protected(set) ApiPathsCollection $apiPaths
