@@ -16,10 +16,10 @@ use Throwable;
  */
 abstract class TypedCollection extends GenericCollection
 {
-    use CastTypeTrait
-    {
+    use CastTypeTrait {
         cast as protected static __cast;
     }
+
     //private static array $primitive_types = ['bool', 'int', 'float', 'string', 'array', 'object', 'iterable', 'resource', 'null'];
 
     /**
