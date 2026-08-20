@@ -22,8 +22,13 @@ class ApiPathConfig extends AbstractDescriptor
                 $this->method = $value;
             }
         }
-    protected(set) array $headers = [];
-
+    protected(set) array $headers = []
+        {
+            get {
+                return array_map(static fn($value, $key) => str_contains($value, ":") ? ucfirst($value) : "$key: $value", $this->headers, array_keys($this->headers));
+            }
+        }
+    protected(set) bool $requiresAuth = false;
     protected(set) bool $pathParams = false;
     protected(set) BaseParamsCollection $params
         {
