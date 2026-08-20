@@ -38,7 +38,7 @@ class ApiPathConfig extends AbstractDescriptor
             get {
                 $normalizer = static function ($value, $key) {
                     $value = is_callable($value) ? $value() : $value;
-                    return str_contains($value, ":") ? ucfirst($value) : "$key: $value";
+                    return is_numeric($key) && str_contains($value, ":") ? ucfirst($value) : "$key: $value";
                 };
 
                 return array_map($normalizer, $this->headers);
