@@ -2,6 +2,7 @@
 
 namespace Tabula17\Satelles\Utilis\Config;
 
+use Closure;
 use Tabula17\Satelles\Utilis\Config\AbstractDescriptor;
 use Tabula17\Satelles\Utilis\Exception\UnexpectedValueException;
 use Tabula17\Satelles\Utilis\Trait\CastTypeTrait;
@@ -28,6 +29,9 @@ class BaseParamConfig extends AbstractDescriptor
              * @throws \Throwable
              */
             set {
+                if (isset($this->prepareValue)) {
+                    $value = ($this->prepareValue)($value);
+                }
                 $this->value = self::cast($value, $this->type, !$this->allowNull);
             }
             get {
@@ -46,4 +50,5 @@ class BaseParamConfig extends AbstractDescriptor
                 $this->allowNull = $value;
             }
         }
+    protected Closure $prepareValue;
 }
