@@ -45,12 +45,20 @@ class BaseParamsCollection extends TypedCollection
 
     public function getValues(bool $onlyValid = true): array
     {
-        return ($onlyValid ? $this->getValidParams() : $this->getParams())?->map(fn(BaseParamConfig $config) => [$config->name => $config->value]) ?? [];
+        $values = [];
+        foreach (($onlyValid ? $this->getValidParams() : $this->getParams())?->extractAll() as $param) {
+            $values[$param->name] = $param->value;
+        }
+        return $values;
     }
 
     public function getPlaceholders(bool $onlyValid = true): array
     {
-        return ($onlyValid ? $this->getValidParams() : $this->getParams())?->map(fn(BaseParamConfig $config) => [$config->name => $config->placeholder]) ?? [];
+        $values = [];
+        foreach (($onlyValid ? $this->getValidParams() : $this->getParams())?->extractAll() as $param) {
+            $values[$param->name] = $param->placeholder;
+        }
+        return $values;
     }
 
     public function setPlaceholderMask(string $mask): void
