@@ -11,6 +11,7 @@ class BaseParamConfig extends AbstractDescriptor
     use CastTypeTrait;
 
     protected(set) string $name;
+    protected(set) string $description = '';
     protected(set) string $type = 'string'
         {
             set {
