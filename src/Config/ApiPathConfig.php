@@ -41,7 +41,7 @@ class ApiPathConfig extends AbstractDescriptor
                     return str_contains($value, ":") ? ucfirst($value) : "$key: $value";
                 };
 
-                return array_map($normalizer, $this->headers, array_keys($this->headers));
+                return array_map($normalizer, $this->headers);
             }
         }
     protected(set) bool $requiresAuth = false;
