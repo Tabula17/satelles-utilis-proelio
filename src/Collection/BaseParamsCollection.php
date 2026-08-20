@@ -93,6 +93,7 @@ class BaseParamsCollection extends TypedCollection
         $values = [];
 
         foreach ($config as $key => $item) {
+            echo "Adding param: $key with value: ".var_export($item, true)."\n";
             try {
                 $values[$key] = static::cast($item);
             } catch (\Throwable $e) {
