@@ -51,4 +51,5 @@ class BaseParamConfig extends AbstractDescriptor
             }
         }
     protected Closure $prepareValue;
+    protected(set) int $position = 0;
 }

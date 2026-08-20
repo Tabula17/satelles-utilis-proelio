@@ -28,8 +28,14 @@ class BaseParamsCollection extends TypedCollection
         return $this->findParam($paramName)?->value;
     }
 
+    public function sortBy(string $key): static
+    {
+        return $this->sort(fn(BaseParamConfig $a, BaseParamConfig $b) => $a->$key <=> $b->$key);
+    }
+
     public function getValues(): array
     {
+        $this->sortBy('position');
         return $this->map(fn(BaseParamConfig $config) => [$config->name => $config->value]);
     }
 
@@ -75,4 +81,5 @@ class BaseParamsCollection extends TypedCollection
 
         return new static(...$values);
     }
+
 }
