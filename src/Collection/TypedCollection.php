@@ -54,6 +54,10 @@ abstract class TypedCollection extends GenericCollection
         $this->values[] = static::cast($value);
     }
 
+    /**
+     * @throws UnexpectedValueException
+     * @throws InvalidArgumentException
+     */
     public function offsetSet(mixed $offset, mixed $value): void
     {
         if ($offset === null) {
@@ -73,7 +77,9 @@ abstract class TypedCollection extends GenericCollection
         if ($key === null) {
             throw new InvalidArgumentException("Cannot set null key, use add() instead");
         }
-        $this->values[$key] = static::cast($value);
+        $value = static::cast($value);
+
+        parent::set($key, $value);
     }
 
 
