@@ -60,6 +60,18 @@ class ApiConfig extends ConnectionConfig
         return $client;
 
     }
+
+    public function getEndpoint(string $endpoint): ?ApiPathConfig
+    {
+        return $this->apiPaths->get($endpoint);//?->path;
+        // return $this->protocol . '://' . $this->host . $this->basePath . ltrim(($path ?? ''), '/');
+    }
+
+    public function getBaseEndpoint(): string
+    {
+        return $this->protocol . '://' . $this->host . $this->basePath;
+    }
+
     public function getAvailableEndpoints(): array
     {
         return $this->apiPaths->definedPathNames();
