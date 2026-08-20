@@ -45,7 +45,7 @@ class ApiConfig extends ConnectionConfig
                     return str_contains($value, ":") ? ucfirst($value) : "$key: $value";
                 };
 
-                return array_map($normalizer, $this->headers);
+                return array_map($normalizer, $this->headers, array_keys($this->headers));
             }
         }
     protected(set) ApiPathsCollection $apiPaths
