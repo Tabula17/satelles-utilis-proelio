@@ -12,7 +12,7 @@ use Tabula17\Satelles\Utilis\Config\TCPServerConfig;
 class TCPServerCollection extends TypedCollection
 {
 
-    public static string $type = TCPServerConfig::class;
+    final const string TYPE  = TCPServerConfig::class;
     /**
      * @param string $host
      * @return TCPServerConfig|null
@@ -54,6 +54,6 @@ class TCPServerCollection extends TypedCollection
 
     protected static function getType(): string
     {
-        return static::$type;
+        return static::TYPE;
     }
 }

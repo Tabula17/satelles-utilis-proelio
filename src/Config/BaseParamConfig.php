@@ -1,0 +1,48 @@
+<?php
+
+namespace Tabula17\Satelles\Utilis\Config;
+
+use Tabula17\Satelles\Utilis\Config\AbstractDescriptor;
+use Tabula17\Satelles\Utilis\Exception\UnexpectedValueException;
+use Tabula17\Satelles\Utilis\Trait\CastTypeTrait;
+
+class BaseParamConfig extends AbstractDescriptor
+{
+    use CastTypeTrait;
+
+    protected(set) string $name;
+    protected(set) string $type = 'string'
+        {
+            set {
+                if ($value === 'null') {
+                    $this->allowNull = true;
+                }
+                $this->type = $value;
+            }
+        }
+    protected(set) mixed $value
+        {
+            /**
+             * @throws UnexpectedValueException
+             * @throws \Throwable
+             */
+            set {
+                $this->value = self::cast($value, $this->type, !$this->allowNull);
+            }
+            get {
+                // Si el valor es nulo y no es permitido, retornar el valor por defecto. Si no hay valor por defecto, lanzar excepción si allowNull es falso.
+                return $this->value ?? self::cast($this->defaultValue, $this->type, !$this->allowNull);
+            }
+        }
+    protected(set) mixed $defaultValue = null;
+    protected(set) bool $required = false;
+    protected(set) bool $allowNull = false
+        {
+            set {
+                if ($this->type === 'null') {
+                    $value = true;
+                }
+                $this->allowNull = $value;
+            }
+        }
+}

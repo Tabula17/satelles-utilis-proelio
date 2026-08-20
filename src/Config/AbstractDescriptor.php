@@ -87,6 +87,14 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
             }
             if (is_object($value) && method_exists($value, 'toArray')) {
                 $data[$property] = $value->toArray();
+            } elseif (is_object($value) && method_exists($value, 'jsonSerialize')) {
+                $data[$property] = $value->jsonSerialize();
+            } elseif ($value instanceof \UnitEnum) {
+                if ($value instanceof \BackedEnum) {
+                    $data[$property] = $value->value;
+                } else {
+                    $data[$property] = $value->name;
+                }
             } else {
                 $data[$property] = $value;
             }

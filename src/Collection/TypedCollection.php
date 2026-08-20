@@ -4,6 +4,7 @@ namespace Tabula17\Satelles\Utilis\Collection;
 
 use Tabula17\Satelles\Utilis\Exception\InvalidArgumentException;
 use Tabula17\Satelles\Utilis\Exception\UnexpectedValueException;
+use Tabula17\Satelles\Utilis\Trait\CastTypeTrait;
 use Throwable;
 
 /**
@@ -15,8 +16,11 @@ use Throwable;
  */
 abstract class TypedCollection extends GenericCollection
 {
-
-    private static array $primitive_types = ['bool', 'int', 'float', 'string', 'array', 'object', 'iterable', 'resource', 'null'];
+    use CastTypeTrait
+    {
+        cast as protected static __cast;
+    }
+    //private static array $primitive_types = ['bool', 'int', 'float', 'string', 'array', 'object', 'iterable', 'resource', 'null'];
 
     /**
      * @throws UnexpectedValueException
@@ -42,60 +46,7 @@ abstract class TypedCollection extends GenericCollection
     public static function cast(mixed $value, ?string $type = null)
     {
         $class = static::getType();
-        if (isset($type) && is_subclass_of($type, $class)) {
-            $class = $type;
-        }
-        if (in_array(strtolower($class), static::$primitive_types, true)) {
-            $class = strtolower($class);
-            $check = "is_$class";
-            if (!$check($value)) {
-                if ($class === 'resource' || $class === 'iterable') {
-                    throw new UnexpectedValueException("Value must be of type $class");
-                }
-                settype($value, $class);
-            }
-            return $value;
-        }
-        if (!class_exists($class) && !interface_exists($class)) {
-            throw new UnexpectedValueException("Class or Interface $class does not exist");
-        }
-        if (is_object($value)) {
-            if (!($value instanceof $class)) {
-                if (interface_exists($class)) {
-                    throw new UnexpectedValueException("Value must implement $class. Cannot cast to $class");
-                }
-                throw new UnexpectedValueException("Value must be of type $class");
-            }
-            return $value;
-        }
-        try {
-            try {
-                return new $class($value);
-            } catch (Throwable $ignored) {
-                return new $class(...(is_array($value) ? $value : [$value]));
-            }
-        } catch (Throwable $e) {
-            throw new UnexpectedValueException("Unable to instantiate $class from value", 0, $e);
-        }
-    }
-
-
-    /**
-     * @throws UnexpectedValueException
-     */
-    public static function fromArray(array $config): static
-    {
-        $values = [];
-
-        foreach ($config as $key => $item) {
-            try {
-                $values[$key] = static::cast($item);
-            } catch (Throwable $e) {
-                continue;
-            }
-        }
-
-        return new static(...$values);
+        return static::__cast($value, $type ?? $class);
     }
 
     public function add(mixed $value): void
@@ -113,6 +64,10 @@ abstract class TypedCollection extends GenericCollection
     }
 
 
+    /**
+     * @throws UnexpectedValueException
+     * @throws InvalidArgumentException
+     */
     public function set(mixed $key, mixed $value): void
     {
         if ($key === null) {

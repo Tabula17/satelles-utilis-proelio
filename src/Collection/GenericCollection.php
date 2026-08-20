@@ -156,7 +156,6 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         if (function_exists('array_find')) {
             return array_find($this->values, static fn($value, $key) => $callback($value, $key));
         }
-
         foreach ($this->values as $key => $value) {
             if ($callback($value, $key)) {
                 return $value;
@@ -171,7 +170,6 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         if (function_exists('array_find_key')) {
             return array_find_key($this->values, static fn($value, $key) => $callback($value, $key));
         }
-
         foreach ($this->values as $key => $value) {
             if ($callback($value, $key)) {
                 return $key;

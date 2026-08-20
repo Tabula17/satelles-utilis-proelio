@@ -13,7 +13,8 @@ use Tabula17\Satelles\Utilis\Exception\UnexpectedValueException;
 class ConnectionCollection extends TypedCollection
 {
 
-    public static string $type = ConnectionConfig::class;
+    final const string TYPE = ConnectionConfig::class;
+    //public static string $type = ConnectionConfig::class;
 
     /**
      * @param string $name
@@ -56,7 +57,7 @@ class ConnectionCollection extends TypedCollection
 
     protected static function getType(): string
     {
-        return static::$type;
+        return static::TYPE;
     }
 
     /**
