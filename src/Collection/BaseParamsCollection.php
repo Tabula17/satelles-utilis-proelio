@@ -83,7 +83,7 @@ class BaseParamsCollection extends TypedCollection
         foreach ($values as $name => $value) {
             $param = $this->findParam($name);
             if ($param) {
-                $param->value = $value;
+                $param->set('value', $value);
             }
         }
     }
@@ -92,7 +92,7 @@ class BaseParamsCollection extends TypedCollection
     {
         $param = $this->findParam($name);
         if ($param) {
-            $param->value = $value;
+            $param->set('value', $value);
         }
     }
 
