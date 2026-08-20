@@ -184,7 +184,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         $values = array_filter($this->values, $callback, ARRAY_FILTER_USE_BOTH);
         $instance = new static();
         foreach ($values as $key=> $value) {
-            $this->set($key, $value);
+            $instance->set($key, $value);
         }
         return $instance;
     }
@@ -194,7 +194,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         $values = array_filter($this->values, $callback, ARRAY_FILTER_USE_KEY);
         $instance = new static();
         foreach ($values as $key=> $value) {
-            $this->set($key, $value);
+            $instance->set($key, $value);
         }
         return $instance;
     }
@@ -204,7 +204,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         $values = array_filter($this->values, $callback, ARRAY_FILTER_USE_BOTH);
         $instance = new static();
         foreach ($values as $key=> $value) {
-            $this->set($key, $value);
+            $instance->set($key, $value);
         }
         return $instance;
     }
@@ -227,7 +227,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         $values = array_map($callback, $this->values);
         $instance = new static();
         foreach ($values as $key=> $value) {
-            $this->set($key, $value);
+            $instance->set($key, $value);
         }
         return $instance;
     }
@@ -342,7 +342,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         $values = array_unique($this->values, $strict ? SORT_REGULAR : SORT_STRING);
         $instance = new static();
         foreach ($values as $key=> $value) {
-            $this->set($key, $value);
+            $instance->set($key, $value);
         }
         return $instance;
     }
@@ -355,7 +355,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         $values = array_reverse($this->values);
         $instance = new static();
         foreach ($values as $key=> $value) {
-            $this->set($key, $value);
+            $instance->set($key, $value);
         }
         return $instance;
     }
@@ -373,7 +373,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         }
         $instance = new static();
         foreach ($values as $key=> $value) {
-            $this->set($key, $value);
+            $instance->set($key, $value);
         }
         return $instance;
     }
@@ -391,7 +391,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         }
         $instance = new static();
         foreach ($values as $key=> $value) {
-            $this->set($key, $value);
+            $instance->set($key, $value);
         }
         return $instance;
     }
@@ -404,7 +404,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         $values = array_slice($this->values, $offset, $length, true);
         $instance = new static();
         foreach ($values as $key=> $value) {
-            $this->set($key, $value);
+            $instance->set($key, $value);
         }
         return $instance;
     }
@@ -440,7 +440,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         }
         $instance = new static();
         foreach ($values as $key=> $value) {
-            $this->set($key, $value);
+            $instance->set($key, $value);
         }
         return $instance;
     }
