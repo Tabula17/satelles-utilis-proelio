@@ -28,8 +28,19 @@ class ApiConfig extends ConnectionConfig
         "Content-Type" => "application/json"
     ]
         {
+            set {
+                $value = array_map(
+                    static function ($value) {
+                        if (!is_string(is_callable($value) ? $value() : $value)) {
+                            throw new \InvalidArgumentException('Los valores de los headers deben ser cadenas');
+                        }
+                        return $value;
+                    }, $value
+                );
+                $this->headers = $value;
+            }
             get {
-                return array_map(static fn($value, $key) => str_contains($value, ":") ? ucfirst($value) : "$key: $value", $this->headers, array_keys($this->headers));
+                return array_map(static fn($value, $key) => str_contains(is_callable($value) ? $value() : $value, ":") ? ucfirst($value) : "$key: $value", $this->headers);
             }
         }
     protected(set) ApiPathsCollection $apiPaths
