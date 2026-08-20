@@ -20,7 +20,7 @@ class BaseParamsCollection extends TypedCollection
 
     public function findParam(string $name): mixed
     {
-        return $this->find(fn(BaseParamConfig $config) => $config->name === $name)?->value;
+        return $this->find(fn(BaseParamConfig $config) => $config->name === $name);
     }
 
     public function getValue(string $paramName): mixed
