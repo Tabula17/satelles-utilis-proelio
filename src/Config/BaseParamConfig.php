@@ -36,8 +36,11 @@ class BaseParamConfig extends AbstractDescriptor
                 $this->value = self::cast($value, $this->type, $this->allowNull);
             }
             get {
-                // Si el valor es nulo y no es permitido, retornar el valor por defecto. Si no hay valor por defecto, lanzar excepción si allowNull es falso.
-                return $this->value ?? self::cast($this->defaultValue, $this->type, $this->allowNull);
+                if ($this->required || $this->value) {
+                    // Si el valor es nulo y no es permitido, retornar el valor por defecto. Si no hay valor por defecto, lanzar excepción si allowNull es falso.
+                    return $this->value ?? self::cast($this->defaultValue, $this->type, $this->allowNull);
+                }
+                return $this->value;
             }
         }
     protected(set) mixed $defaultValue = null;
