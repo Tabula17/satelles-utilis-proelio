@@ -35,7 +35,7 @@ class BaseParamsCollection extends TypedCollection
 
     public function getValidParams(): ?self
     {
-        return $this->filter(fn(BaseParamConfig $config) => $config->required || isset($config->value))?->sortBy('position');
+        return $this->filter(fn(BaseParamConfig $config) => $config->required || $config->hasValue())?->sortBy('position');
     }
 
     public function getParams(): ?self

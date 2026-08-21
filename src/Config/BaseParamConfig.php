@@ -23,6 +23,8 @@ class BaseParamConfig extends AbstractDescriptor
                 $this->type = $value;
             }
         }
+    private mixed $rawValue;
+    private bool $isInitialized = false;
     protected(set) mixed $value
         {
             /**
@@ -33,14 +35,15 @@ class BaseParamConfig extends AbstractDescriptor
                 if (isset($this->prepareValue)) {
                     $value = ($this->prepareValue)($value);
                 }
-                $this->value = self::cast($value, $this->type, $this->allowNull);
+                $this->rawValue = self::cast($value, $this->type, $this->allowNull);
+                $this->isInitialized = true;
             }
             get {
-                if ($this->required || isset($this->value)) {
+                if ($this->required || $this->isInitialized) {
                     // Si el valor es nulo y no es permitido, retornar el valor por defecto. Si no hay valor por defecto, lanzar excepción si allowNull es falso.
-                    return $this->value ?? self::cast($this->defaultValue, $this->type, $this->allowNull);
+                    return $this->rawValue ?? self::cast($this->defaultValue, $this->type, $this->allowNull);
                 }
-                return $this->value;
+                return $this->rawValue;
             }
         }
     protected(set) mixed $defaultValue = null;
@@ -76,5 +79,10 @@ class BaseParamConfig extends AbstractDescriptor
     public function setPlaceholderMask(string $placeholder): void
     {
         $this->placeHolderMask = $placeholder;
+    }
+
+    public function hasValue(): bool
+    {
+        return $this->isInitialized;
     }
 }
