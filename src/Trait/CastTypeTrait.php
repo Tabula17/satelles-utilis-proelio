@@ -23,8 +23,18 @@ trait CastTypeTrait
     ];
 
     /**
-     * @throws Throwable
-     * @throws UnexpectedValueException
+     * Casts a value to the specified type, handling primitive types, class instances,
+     * interfaces, and dynamic object instantiations.
+     * If the casting or type check fails, the behavior depends on the `$silent` parameter.
+     *
+     * @param mixed $value The value to be cast or checked.
+     * @param string $type The target type to cast or validate against. This can be a primitive type,
+     *                     a fully qualified class name, or an interface.
+     * @param bool $silent Determines whether to suppress exceptions.
+     *                     If true, null is returned on failure. Defaults to true.
+     * @return mixed Returns the cast value if successful, or null in silent mode on failure.
+     * @throws UnexpectedValueException|Throwable If the value cannot be cast to the specified type
+     *                                  and silent mode is disabled.
      */
     public static function cast(mixed $value, string $type, bool $silent = true): mixed
     {
@@ -49,7 +59,9 @@ trait CastTypeTrait
                     if ($mappedType === 'null') {
                         return null;
                     }
-
+                    if ($value === null && !$silent) {
+                        throw new UnexpectedValueException('Cannot cast null to ' . $type . ' when silent mode is off (null is not a valid value for ' . $type . ' type)');
+                    }
                     // settype necesita el nombre compatible (integer/boolean)
                     settype($value, $mappedType);
                 }

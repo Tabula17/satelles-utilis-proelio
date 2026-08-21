@@ -6,6 +6,7 @@ use Closure;
 use Tabula17\Satelles\Utilis\Config\AbstractDescriptor;
 use Tabula17\Satelles\Utilis\Exception\UnexpectedValueException;
 use Tabula17\Satelles\Utilis\Trait\CastTypeTrait;
+use Throwable;
 
 class BaseParamConfig extends AbstractDescriptor
 {
@@ -26,7 +27,7 @@ class BaseParamConfig extends AbstractDescriptor
         {
             /**
              * @throws UnexpectedValueException
-             * @throws \Throwable
+             * @throws Throwable
              */
             set {
                 if (isset($this->prepareValue)) {
