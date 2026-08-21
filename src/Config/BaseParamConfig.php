@@ -33,11 +33,11 @@ class BaseParamConfig extends AbstractDescriptor
                 if (isset($this->prepareValue)) {
                     $value = ($this->prepareValue)($value);
                 }
-                $this->value = self::cast($value, $this->type, !$this->allowNull);
+                $this->value = self::cast($value, $this->type, $this->allowNull);
             }
             get {
                 // Si el valor es nulo y no es permitido, retornar el valor por defecto. Si no hay valor por defecto, lanzar excepción si allowNull es falso.
-                return $this->value ?? self::cast($this->defaultValue, $this->type, !$this->allowNull);
+                return $this->value ?? self::cast($this->defaultValue, $this->type, $this->allowNull);
             }
         }
     protected(set) mixed $defaultValue = null;
@@ -59,6 +59,9 @@ class BaseParamConfig extends AbstractDescriptor
     }
     private string $placeHolderMask = ':%%name%%'
         {
+            /**
+             * @throws UnexpectedValueException
+             */
             set {
                 if (!str_contains($value, '%%name%%')) {
                     throw new UnexpectedValueException('El placeholder debe contener el token %%name%%');
