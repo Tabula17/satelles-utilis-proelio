@@ -196,6 +196,11 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         return $response;
     }
 
+    public static function matchModel(array $data): bool
+    {
+        $model = static::getModel();
+        return  empty(array_diff_key($data, $model));
+    }
     public function __serialize(): array
     {
         $defaultValues = get_class_vars(static::class);
