@@ -18,6 +18,10 @@ use Traversable;
  */
 abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, JsonSerializable
 {
+    /**
+     *
+     * @var array
+     */
     private array $publicProperties = [];
 
     public function __construct(?array $values = [])
@@ -30,6 +34,11 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         $this->loadProperties($values);
     }
 
+    /**
+     * Establece un valor para una propiedad
+     * @param string $property
+     * @param mixed $value
+     */
     public function set(string $property, mixed $value): void
     {
         if (property_exists($this, $property) && $this->isAccessible($property)) {
@@ -42,6 +51,11 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         }
     }
 
+    /**
+     * Comprueba si una propiedad es accesible
+     * @param string $property
+     * @return bool
+     */
     private function isAccessible(string $property): bool
     {
         return in_array($property, $this->publicProperties, true);
@@ -78,13 +92,18 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         }
     }
 
+    /**
+     * Convierte el objeto en un array
+     * @return array
+     */
     public function toArray(): array
     {
         $data = [];
-        foreach (get_mangled_object_vars($this) as $property => $value) { //get_object_vars
+        foreach (get_mangled_object_vars($this) as $property => $v) { //get_object_vars
             if (!$this->isAccessible($property)) {
                 continue;
             }
+            $value = $this->$property; // Llamamos al getter para obtener el valor de la propiedad (soporte para hooks!)
             if (is_object($value) && method_exists($value, 'toArray')) {
                 $data[$property] = $value->toArray();
             } elseif (is_object($value) && method_exists($value, 'jsonSerialize')) {
@@ -169,6 +188,10 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         return $value;
     }
 
+    /**
+     * Devuelve un array con el modelo de la clase
+     * @return array
+     */
     public static function getModel(): array
     {
         $response = [];
