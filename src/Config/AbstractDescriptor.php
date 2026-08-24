@@ -200,7 +200,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
      * Comprueba si un conjunto de datos coincide con el modelo definido.
      * Si $strict es true, verifica que todas las claves en $data existan en el modelo.
      * Si $strict es false, verifica que algunas claves en $data existan en el modelo.
-     * Esto es útil para validar si un conjunto de datos puede ser convertido en una instancia del modelo.
+     * Esto, en conjunto con el metodo AbstractDescriptor::fromArray, es útil para validar si un conjunto de datos puede ser convertido en una instancia del modelo.
      *
      * @param array $data Conjunto de datos a validar.
      * @param bool $strict Determina si la validación debe ser estricta.
