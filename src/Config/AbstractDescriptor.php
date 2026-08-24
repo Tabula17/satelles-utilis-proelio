@@ -196,11 +196,27 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         return $response;
     }
 
-    public static function matchModel(array $data): bool
+    /**
+     * Comprueba si un conjunto de datos coincide con el modelo definido.
+     * Si $strict es true, verifica que todas las claves en $data existan en el modelo.
+     * Si $strict es false, verifica que algunas claves en $data existan en el modelo.
+     * Esto es útil para validar si un conjunto de datos puede ser convertido en una instancia del modelo.
+     *
+     * @param array $data Conjunto de datos a validar.
+     * @param bool $strict Determina si la validación debe ser estricta.
+     * @return bool Devuelve true si los datos coinciden según el nivel de validación definido, o false en caso contrario.
+     */
+    public static function matchModel(array $data, bool $strict = false): bool
     {
         $model = static::getModel();
-        return  empty(array_diff_key($data, $model));
+        // if strict is true, check if all keys in $data exist in $model
+        if ($strict) {
+            return empty(array_diff_key($data, $model));
+        }
+        // if strict is false, check if some keys in $data exist in $model. If count keys are greater than count diff keys, return true
+        return count(array_keys($data)) > count(array_diff_key($data, $model));
     }
+
     public function __serialize(): array
     {
         $defaultValues = get_class_vars(static::class);
