@@ -183,7 +183,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     {
         $values = array_filter($this->values, $callback, ARRAY_FILTER_USE_BOTH);
         $instance = new static();
-        foreach ($values as $key=> $value) {
+        foreach ($values as $key => $value) {
             $instance->set($key, $value);
         }
         return $instance;
@@ -193,7 +193,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     {
         $values = array_filter($this->values, $callback, ARRAY_FILTER_USE_KEY);
         $instance = new static();
-        foreach ($values as $key=> $value) {
+        foreach ($values as $key => $value) {
             $instance->set($key, $value);
         }
         return $instance;
@@ -203,7 +203,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     {
         $values = array_filter($this->values, $callback, ARRAY_FILTER_USE_BOTH);
         $instance = new static();
-        foreach ($values as $key=> $value) {
+        foreach ($values as $key => $value) {
             $instance->set($key, $value);
         }
         return $instance;
@@ -226,7 +226,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     {
         $values = array_map($callback, $this->values);
         $instance = new static();
-        foreach ($values as $key=> $value) {
+        foreach ($values as $key => $value) {
             $instance->set($key, $value);
         }
         return $instance;
@@ -292,32 +292,37 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return array_unshift($this->values, ...$values);
     }
 
-    public function remove(mixed $value, bool $strict = true): void
+    public function remove(mixed $value, bool $strict = true): static
     {
         $this->values = array_filter(
             $this->values,
             static fn($item) => $strict ? $item !== $value : $item != $value
         );
+        return $this;
     }
 
-    public function removeAt(int|string $index): void
+    public function removeAt(int|string $index): static
     {
         unset($this->values[$index]);
+        return $this;
     }
 
-    public function clear(): void
+    public function clear(): static
     {
         $this->values = [];
+        return $this;
     }
 
-    public function set(mixed $key, mixed $value): void
+    public function set(mixed $key, mixed $value): static
     {
         $this->values[$key] = $value;
+        return $this;
     }
 
-    public function add(mixed $value): void
+    public function add(mixed $value): static
     {
         $this->values[] = $value;
+        return $this;
     }
 
     public function addIfNotExist(mixed $value, bool $strict = true): bool
@@ -341,7 +346,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     {
         $values = array_unique($this->values, $strict ? SORT_REGULAR : SORT_STRING);
         $instance = new static();
-        foreach ($values as $key=> $value) {
+        foreach ($values as $key => $value) {
             $instance->set($key, $value);
         }
         return $instance;
@@ -354,7 +359,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     {
         $values = array_reverse($this->values);
         $instance = new static();
-        foreach ($values as $key=> $value) {
+        foreach ($values as $key => $value) {
             $instance->set($key, $value);
         }
         return $instance;
@@ -372,7 +377,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
             usort($values, $callback);
         }
         $instance = new static();
-        foreach ($values as $key=> $value) {
+        foreach ($values as $key => $value) {
             $instance->set($key, $value);
         }
         return $instance;
@@ -390,7 +395,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
             uksort($values, $callback);
         }
         $instance = new static();
-        foreach ($values as $key=> $value) {
+        foreach ($values as $key => $value) {
             $instance->set($key, $value);
         }
         return $instance;
@@ -403,7 +408,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     {
         $values = array_slice($this->values, $offset, $length, true);
         $instance = new static();
-        foreach ($values as $key=> $value) {
+        foreach ($values as $key => $value) {
             $instance->set($key, $value);
         }
         return $instance;
@@ -439,7 +444,7 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
             $values = array_merge(array_values($values), array_values($incoming));
         }
         $instance = new static();
-        foreach ($values as $key=> $value) {
+        foreach ($values as $key => $value) {
             $instance->set($key, $value);
         }
         return $instance;
@@ -453,11 +458,22 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     /**
      * Aplica un callback a cada elemento de la colección
      */
-    public function each(callable $callback): void
+    public function each(callable $callback): static
     {
         foreach ($this->values as $key => $value) {
             $callback($value, $key);
         }
+        return $this;
+    }
+
+    public function until(callable $callback): static
+    {
+        foreach ($this->values as $key => $value) {
+            if (!$callback($value, $key)) {
+                break;
+            }
+        }
+        return $this;
     }
 
     /**
@@ -508,18 +524,20 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return $this->values[$offset] ?? null;
     }
 
-    public function offsetSet(mixed $offset, mixed $value): void
+    public function offsetSet(mixed $offset, mixed $value): static
     {
         if ($offset === null) {
             $this->values[] = $value;
         } else {
             $this->values[$offset] = $value;
         }
+        return $this;
     }
 
-    public function offsetUnset(mixed $offset): void
+    public function offsetUnset(mixed $offset): static
     {
         unset($this->values[$offset]);
+        return $this;
     }
 
     // Serialización mejorada usando el trait
