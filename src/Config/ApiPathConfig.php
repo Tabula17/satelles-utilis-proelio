@@ -28,7 +28,7 @@ class ApiPathConfig extends AbstractDescriptor
                 $value = array_map(
                     static function ($value) {
                         if (!is_string(is_callable($value) ? $value() : $value)) {
-                            throw new InvalidArgumentException('Los valores de los headers deben ser cadenas');
+                            throw new \InvalidArgumentException('Los valores de los headers deben ser cadenas');
                         }
                         return $value;
                     }, $value
@@ -37,13 +37,22 @@ class ApiPathConfig extends AbstractDescriptor
             }
             get {
                 $normalizer = static function ($value, $key) {
-                    $value = is_callable($value) ? $value() : $value;
-                    return is_numeric($key) && str_contains($value, ":") ? ucfirst($value) : "$key: $value";
+                    return is_callable($value) ? $value() : $value;
                 };
 
                 return array_map($normalizer, $this->headers, array_keys($this->headers));
             }
         }
+    public array $headersAsStrings {
+        get {
+            $normalizer = static function ($value, $key) {
+                return is_numeric($key) && str_contains($value, ":") ? ucfirst($value) : "$key: $value";
+            };
+
+            return array_map($normalizer, $this->headers, array_keys($this->headers));
+        }
+
+    }
     protected(set) bool $requiresAuth = false;
     protected(set) bool $pathParams = false;
 
