@@ -36,11 +36,11 @@ class ApiPathConfig extends AbstractDescriptor
                 $this->headers = $value;
             }
             get {
-                $normalizer = static function ($value, $key) {
+                $normalizer = static function ($value) {
                     return is_callable($value) ? $value() : $value;
                 };
 
-                return array_map($normalizer, $this->headers, array_keys($this->headers));
+                return array_map($normalizer, $this->headers);
             }
         }
     public array $headersAsStrings {
