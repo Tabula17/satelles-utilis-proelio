@@ -29,13 +29,18 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     protected array $values = [];
 
 
+    /**
+     * @return Traversable<array-key, T>
+     */
     public function getIterator(): Traversable
     {
         return new ArrayIterator($this->values);
     }
 
     /**
-     * Convierte la colección a array con soporte para objetos anidados
+     * Convierte la colección a array con soporte para objetos anidados.
+     *
+     * @return array<array-key, mixed>
      */
     public function toArray(): array
     {
@@ -45,16 +50,15 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     }
 
     /**
-     * Normaliza un valor para su representación en array
+     * Normaliza un valor para su representación en array.
+     *
+     * @param mixed $value
+     * @return mixed
      */
     protected function normalizeValue(mixed $value): mixed
     {
         if ($value instanceof JsonSerializable) {
             return $value->jsonSerialize();
-        }
-
-        if ($value instanceof self) {
-            return $value->toArray();
         }
 
         if (is_object($value) && method_exists($value, 'toArray')) {
@@ -68,23 +72,42 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return $value;
     }
 
+    /**
+     * Serializa la colección a un array compatible con JSON.
+     *
+     * @return array<array-key, mixed>
+     */
     public function jsonSerialize(): array
     {
         return $this->toArray();
     }
 
+    /**
+     * Devuelve el número de elementos en la colección.
+     *
+     * @return int
+     */
     public function count(): int
     {
         return count($this->values);
     }
 
+    /**
+     * Determina si la colección está vacía.
+     *
+     * @return bool
+     */
     public function isEmpty(): bool
     {
         return empty($this->values);
     }
 
     /**
-     * Obtiene un valor por clave con soporte para notación de punto (ej: 'user.profile.name')
+     * Obtiene un valor por clave con soporte para notación de punto (ej: 'user.profile.name').
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
      */
     public function get(string $key, mixed $default = null): mixed
     {
@@ -96,7 +119,11 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     }
 
     /**
-     * Obtiene un valor anidado usando notación de punto
+     * Obtiene un valor anidado usando notación de punto.
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
      */
     protected function getNestedValue(string $key, mixed $default = null): mixed
     {
@@ -114,7 +141,10 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     }
 
     /**
-     * Verifica si existe una clave con soporte para notación de punto
+     * Verifica si existe una clave con soporte para notación de punto.
+     *
+     * @param string $key
+     * @return bool
      */
     public function has(string $key): bool
     {
@@ -126,7 +156,10 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     }
 
     /**
-     * Verifica si existe una clave anidada usando notación de punto
+     * Verifica si existe una clave anidada usando notación de punto.
+     *
+     * @param string $key
+     * @return bool
      */
     protected function hasNestedKey(string $key): bool
     {
@@ -144,13 +177,23 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     }
 
     /**
-     * Obtiene un valor o ejecuta callback si no existe
+     * Obtiene un valor o ejecuta callback si no existe.
+     *
+     * @param string $key
+     * @param callable $callback
+     * @return mixed
      */
     public function getOrElse(string $key, callable $callback): mixed
     {
         return $this->has($key) ? $this->get($key) : $callback();
     }
 
+    /**
+     * Busca el primer elemento que cumpla con la condición del callback.
+     *
+     * @param callable(T, array-key): bool $callback
+     * @return T|null
+     */
     public function find(callable $callback): mixed
     {
         if (function_exists('array_find')) {
@@ -165,6 +208,12 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return null;
     }
 
+    /**
+     * Busca la clave del primer elemento que cumpla con la condición del callback.
+     *
+     * @param callable(T, array-key): bool $callback
+     * @return array-key|null
+     */
     public function findKey(callable $callback): mixed
     {
         if (function_exists('array_find_key')) {
@@ -179,6 +228,12 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return null;
     }
 
+    /**
+     * Filtra la colección usando un callback (recibe valor y clave).
+     *
+     * @param callable(T, array-key): bool $callback
+     * @return static
+     */
     public function filter(callable $callback): static
     {
         $values = array_filter($this->values, $callback, ARRAY_FILTER_USE_BOTH);
@@ -189,6 +244,12 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return $instance;
     }
 
+    /**
+     * Filtra la colección por sus claves.
+     *
+     * @param callable(array-key): bool $callback
+     * @return static
+     */
     public function filterKeys(callable $callback): static
     {
         $values = array_filter($this->values, $callback, ARRAY_FILTER_USE_KEY);
@@ -199,39 +260,66 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return $instance;
     }
 
+    /**
+     * Alias de filter(). Filtra la colección usando valor y clave.
+     *
+     * @param callable(T, array-key): bool $callback
+     * @return static
+     */
     public function filterKeyOrValue(callable $callback): static
     {
-        $values = array_filter($this->values, $callback, ARRAY_FILTER_USE_BOTH);
-        $instance = new static();
-        foreach ($values as $key => $value) {
-            $instance->set($key, $value);
-        }
-        return $instance;
+        return $this->filter($callback);
     }
 
+    /**
+     * Reduce la colección a un solo valor.
+     *
+     * @param callable(mixed, T): mixed $callback
+     * @param mixed $initial
+     * @return mixed
+     */
     public function reduce(callable $callback, mixed $initial = null): mixed
     {
         return array_reduce($this->values, $callback, $initial);
     }
 
+    /**
+     * Aplica un callback a cada elemento y devuelve un array con los resultados.
+     *
+     * @template U
+     * @param callable(T, array-key): U $callback
+     * @return array<array-key, U>
+     */
     public function map(callable $callback): array
     {
-        return array_map($callback, $this->values);
+        $result = [];
+        foreach ($this->values as $key => $value) {
+            $result[$key] = $callback($value, $key);
+        }
+        return $result;
     }
 
     /**
-     * Transforma la colección aplicando un callback y manteniendo la instancia
+     * Transforma la colección aplicando un callback y manteniendo la instancia.
+     *
+     * @param callable(T, array-key): T $callback
+     * @return static
      */
     public function transform(callable $callback): static
     {
-        $values = array_map($callback, $this->values);
         $instance = new static();
-        foreach ($values as $key => $value) {
-            $instance->set($key, $value);
+        foreach ($this->values as $key => $value) {
+            $instance->set($key, $callback($value, $key));
         }
         return $instance;
     }
 
+    /**
+     * Determina si al menos un elemento cumple la condición.
+     *
+     * @param callable(T, array-key): bool $callback
+     * @return bool
+     */
     public function some(callable $callback): bool
     {
         if (function_exists('array_any')) {
@@ -247,6 +335,12 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return false;
     }
 
+    /**
+     * Determina si todos los elementos cumplen la condición.
+     *
+     * @param callable(T, array-key): bool $callback
+     * @return bool
+     */
     public function every(callable $callback): bool
     {
         if (function_exists('array_all')) {
@@ -262,36 +356,75 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return true;
     }
 
+    /**
+     * Obtiene el primer elemento de la colección.
+     *
+     * @return T|null
+     */
     public function first(): mixed
     {
         return $this->values[array_key_first($this->values)] ?? null;
     }
 
+    /**
+     * Obtiene el último elemento de la colección.
+     *
+     * @return T|null
+     */
     public function last(): mixed
     {
         return $this->values[array_key_last($this->values)] ?? null;
     }
 
+    /**
+     * Extrae y devuelve el último elemento de la colección.
+     *
+     * @return T|null
+     */
     public function pop(): mixed
     {
         return array_pop($this->values);
     }
 
+    /**
+     * Añade uno o más elementos al final de la colección.
+     *
+     * @param T ...$values
+     * @return int Nuevo número de elementos.
+     */
     public function push(...$values): int
     {
         return array_push($this->values, ...$values);
     }
 
+    /**
+     * Extrae y devuelve el primer elemento de la colección.
+     *
+     * @return T|null
+     */
     public function shift(): mixed
     {
         return array_shift($this->values);
     }
 
+    /**
+     * Añade uno o más elementos al inicio de la colección.
+     *
+     * @param T ...$values
+     * @return int Nuevo número de elementos.
+     */
     public function unshift(...$values): int
     {
         return array_unshift($this->values, ...$values);
     }
 
+    /**
+     * Elimina todas las ocurrencias de un valor específico.
+     *
+     * @param T $value
+     * @param bool $strict
+     * @return static
+     */
     public function remove(mixed $value, bool $strict = true): static
     {
         $this->values = array_filter(
@@ -301,30 +434,61 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return $this;
     }
 
+    /**
+     * Elimina un elemento por su clave/índice.
+     *
+     * @param int|string $index
+     * @return static
+     */
     public function removeAt(int|string $index): static
     {
         unset($this->values[$index]);
         return $this;
     }
 
+    /**
+     * Vacía la colección.
+     *
+     * @return static
+     */
     public function clear(): static
     {
         $this->values = [];
         return $this;
     }
 
+    /**
+     * Establece un valor para una clave específica.
+     *
+     * @param mixed $key
+     * @param T $value
+     * @return static
+     */
     public function set(mixed $key, mixed $value): static
     {
         $this->values[$key] = $value;
         return $this;
     }
 
+    /**
+     * Añade un elemento a la colección.
+     *
+     * @param T $value
+     * @return static
+     */
     public function add(mixed $value): static
     {
         $this->values[] = $value;
         return $this;
     }
 
+    /**
+     * Añade un elemento solo si no existe ya en la colección.
+     *
+     * @param T $value
+     * @param bool $strict
+     * @return bool True si se añadió, false si ya existía.
+     */
     public function addIfNotExist(mixed $value, bool $strict = true): bool
     {
         if (!in_array($value, $this->values, $strict)) {
@@ -334,13 +498,23 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return false;
     }
 
+    /**
+     * Verifica si la colección contiene un valor específico.
+     *
+     * @param T $value
+     * @param bool $strict
+     * @return bool
+     */
     public function contains(mixed $value, bool $strict = true): bool
     {
         return in_array($value, $this->values, $strict);
     }
 
     /**
-     * Obtiene valores únicos de la colección
+     * Obtiene valores únicos de la colección.
+     *
+     * @param bool $strict
+     * @return static
      */
     public function unique(bool $strict = true): static
     {
@@ -353,7 +527,9 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     }
 
     /**
-     * Revierte el orden de la colección
+     * Revierte el orden de la colección.
+     *
+     * @return static
      */
     public function reverse(): static
     {
@@ -366,7 +542,10 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     }
 
     /**
-     * Ordena la colección
+     * Ordena la colección por sus valores.
+     *
+     * @param callable|null $callback
+     * @return static
      */
     public function sort(callable|null $callback = null): static
     {
@@ -384,7 +563,10 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     }
 
     /**
-     * Ordena la colección por claves
+     * Ordena la colección por sus claves.
+     *
+     * @param callable|null $callback
+     * @return static
      */
     public function sortKeys(callable|null $callback = null): static
     {
@@ -402,7 +584,11 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     }
 
     /**
-     * Extrae una porción de la colección
+     * Extrae una porción de la colección.
+     *
+     * @param int $offset
+     * @param int|null $length
+     * @return static
      */
     public function slice(int $offset, int|null $length = null): static
     {
@@ -415,7 +601,9 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     }
 
     /**
-     * Obtiene las claves de la colección
+     * Obtiene las claves de la colección.
+     *
+     * @return array<int, array-key>
      */
     public function keys(): array
     {
@@ -423,7 +611,9 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     }
 
     /**
-     * Obtiene los valores de la colección
+     * Obtiene los valores de la colección como un array indexado.
+     *
+     * @return array<int, T>
      */
     public function values(): array
     {
@@ -431,9 +621,13 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     }
 
     /**
-     * Combina esta colección con otra
+     * Combina esta colección con otra.
+     *
+     * @param GenericCollection<T>|array<array-key, T> $collection
+     * @param bool $preserveKeys
+     * @return static
      */
-    public function merge(GenericCollection|array $collection, bool $preserveKeys = false): static
+    public function merge(self|array $collection, bool $preserveKeys = false): static
     {
         $values = $this->values;
         $incoming = $collection instanceof self ? $collection->extractAll() : $collection;
@@ -450,13 +644,21 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return $instance;
     }
 
+    /**
+     * Devuelve todos los elementos de la colección.
+     *
+     * @return array<array-key, T>
+     */
     public function extractAll(): array
     {
         return $this->values;
     }
 
     /**
-     * Aplica un callback a cada elemento de la colección
+     * Aplica un callback a cada elemento de la colección.
+     *
+     * @param callable(T, array-key): void $callback
+     * @return static
      */
     public function each(callable $callback): static
     {
@@ -466,6 +668,12 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return $this;
     }
 
+    /**
+     * Aplica el callback hasta que devuelva false.
+     *
+     * @param callable(T, array-key): bool $callback
+     * @return static
+     */
     public function until(callable $callback): static
     {
         foreach ($this->values as $key => $value) {
@@ -477,7 +685,10 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     }
 
     /**
-     * Agrupa la colección por una clave o callback
+     * Agrupa la colección por una clave o callback.
+     *
+     * @param (callable(T): (string|int))|string $key
+     * @return array<string|int, array<int, T>>
      */
     public function groupBy(callable|string $key): array
     {
@@ -495,15 +706,26 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     }
 
     /**
-     * Obtiene un valor aleatorio de la colección
+     * Obtiene uno o varios elementos aleatorios de la colección.
+     *
+     * @param int $number Cantidad de elementos a obtener.
+     * @return T|array<int, T>|null
      */
     public function random(int $number = 1): mixed
     {
-        if ($number === 1) {
-            return $this->values[array_rand($this->values)] ?? null;
+        $count = count($this->values);
+
+        if ($count === 0 || $number <= 0) {
+            return $number === 1 ? null : [];
         }
 
-        $keys = array_rand($this->values, $number);
+        $actualNumber = min($number, $count);
+
+        if ($actualNumber === 1) {
+            return $this->values[array_rand($this->values)];
+        }
+
+        $keys = array_rand($this->values, $actualNumber);
         $result = [];
 
         foreach ((array)$keys as $key) {
@@ -513,17 +735,29 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return $result;
     }
 
-    // Implementación de ArrayAccess
+    /**
+     * @param mixed $offset
+     * @return bool
+     */
     public function offsetExists(mixed $offset): bool
     {
         return isset($this->values[$offset]);
     }
 
+    /**
+     * @param mixed $offset
+     * @return T|null
+     */
     public function offsetGet(mixed $offset): mixed
     {
         return $this->values[$offset] ?? null;
     }
 
+    /**
+     * @param mixed $offset
+     * @param T $value
+     * @return static
+     */
     public function offsetSet(mixed $offset, mixed $value): static
     {
         if ($offset === null) {
@@ -534,54 +768,84 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
         return $this;
     }
 
+    /**
+     * @param mixed $offset
+     * @return static
+     */
     public function offsetUnset(mixed $offset): static
     {
         unset($this->values[$offset]);
         return $this;
     }
 
-    // Serialización mejorada usando el trait
+    /**
+     * @return array<array-key, mixed>
+     */
     public function __serialize(): array
     {
         return array_map([$this, 'serializeValue'], $this->values);
     }
 
+    /**
+     * @param array<array-key, mixed> $data
+     * @return void
+     */
     public function __unserialize(array $data): void
     {
         $this->values = array_map([$this, 'unserializeValue'], $data);
     }
 
-    // Clonado mejorado usando el trait
+    /**
+     * Realiza una clonación profunda de los elementos.
+     */
     public function __clone()
     {
         $this->values = array_map([$this, 'cloneValue'], $this->values);
     }
 
     /**
-     * Métodos mágicos para acceso como propiedades
+     * Métodos mágicos para acceso como propiedades.
+     *
+     * @param string $name
+     * @return mixed
      */
     public function __get(string $name): mixed
     {
         return $this->get($name);
     }
 
+    /**
+     * @param string $name
+     * @param T $value
+     * @return void
+     */
     public function __set(string $name, mixed $value): void
     {
         $this->set($name, $value);
     }
 
+    /**
+     * @param string $name
+     * @return bool
+     */
     public function __isset(string $name): bool
     {
         return $this->has($name);
     }
 
+    /**
+     * @param string $name
+     * @return void
+     */
     public function __unset(string $name): void
     {
         $this->removeAt($name);
     }
 
     /**
-     * Convierte la colección a string (JSON)
+     * Convierte la colección a una cadena JSON.
+     *
+     * @return string
      */
     public function __toString(): string
     {
