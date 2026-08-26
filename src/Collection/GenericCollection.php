@@ -756,26 +756,24 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     /**
      * @param mixed $offset
      * @param T $value
-     * @return static
+     * @return void
      */
-    public function offsetSet(mixed $offset, mixed $value): static
+    public function offsetSet(mixed $offset, mixed $value): void
     {
         if ($offset === null) {
             $this->values[] = $value;
         } else {
             $this->values[$offset] = $value;
         }
-        return $this;
     }
 
     /**
      * @param mixed $offset
-     * @return static
+     * @return void
      */
-    public function offsetUnset(mixed $offset): static
+    public function offsetUnset(mixed $offset): void
     {
         unset($this->values[$offset]);
-        return $this;
     }
 
     /**
