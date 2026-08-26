@@ -462,24 +462,22 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
      *
      * @param mixed $key
      * @param T $value
-     * @return static
+     * @return void
      */
-    public function set(mixed $key, mixed $value): static
+    public function set(mixed $key, mixed $value): void
     {
         $this->values[$key] = $value;
-        return $this;
     }
 
     /**
      * Añade un elemento a la colección.
      *
      * @param T $value
-     * @return static
+     * @return void
      */
-    public function add(mixed $value): static
+    public function add(mixed $value): void
     {
         $this->values[] = $value;
-        return $this;
     }
 
     /**
