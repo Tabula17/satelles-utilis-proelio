@@ -32,6 +32,9 @@ class BaseParamConfig extends AbstractDescriptor
              * @throws Throwable
              */
             set {
+                if ($this->mutable === false && $this->isInitialized) {
+                    return;
+                }
                 if (isset($this->prepareValue)) {
                     $value = ($this->prepareValue)($value);
                 }
@@ -59,7 +62,7 @@ class BaseParamConfig extends AbstractDescriptor
         }
     protected Closure $prepareValue;
     protected(set) int $position = 0;
-
+    protected(set) bool $mutable = true;
     public string $placeholder {
         get => str_replace('%%name%%', $this->name, $this->placeHolderMask);
     }

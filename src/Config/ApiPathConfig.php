@@ -73,7 +73,7 @@ class ApiPathConfig extends AbstractDescriptor
                 return $this->params;
             }
         }
-    protected(set) BaseParamsCollection $options
+    protected(set) BaseParamsCollection $options //todo: generar una clase derviada de BaseOParams y BaseParamsCollection para opciones
         {
             set (BaseParamsCollection|array $value) {
                 if (is_array($value)) {
@@ -88,7 +88,7 @@ class ApiPathConfig extends AbstractDescriptor
                 return $this->options;
             }
         }
-    protected(set) BaseParamsCollection $requestHeaders
+    protected(set) BaseParamsCollection $requestHeaders //todo: generar una clase derviada de BaseOParams y BaseParamsCollection para headers
         {
             set (BaseParamsCollection|array $value) {
                 if (is_array($value)) {
