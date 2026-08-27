@@ -74,6 +74,21 @@ class ApiPathConfig extends AbstractDescriptor
                 return $this->params;
             }
         }
+    protected(set) BaseParamsCollection $options
+        {
+            set (BaseParamsCollection|array $value) {
+                if (is_array($value)) {
+                    $value = BaseParamsCollection::fromArray($value);
+                }
+                $this->params = $value;
+            }
+            get {
+                if (!isset($this->params)) {
+                    $this->params = new BaseParamsCollection();
+                }
+                return $this->params;
+            }
+        }
 
     public function getQueryString(bool $onlyValid = true): string
     {
