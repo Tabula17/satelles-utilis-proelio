@@ -42,7 +42,7 @@ class BaseParamConfig extends AbstractDescriptor
                     $this->rawValue = self::cast($value, $this->type, $this->allowNull);
                     $this->isInitialized = true;
                 } catch (Throwable $exception) {
-                    throw new UnexpectedValueException('Error al guardar el valor de `' . $this->name . '`: ' . $exception->getMessage(), $exception->getCode(), $exception);
+                    throw new UnexpectedValueException('Error al inicializar el valor de `' . $this->name . '`: ' . $exception->getMessage(), $exception->getCode(), $exception);
                 }
             }
             get {
@@ -51,7 +51,7 @@ class BaseParamConfig extends AbstractDescriptor
                         // Si el valor es nulo y no es permitido, retornar el valor por defecto. Si no hay valor por defecto, lanzar excepción si allowNull es falso.
                         return $this->rawValue ?? self::cast($this->defaultValue, $this->type, $this->allowNull);
                     } catch (Throwable $exception) {
-                        throw new UnexpectedValueException('Error al guardar el valor de `' . $this->name . '`: ' . $exception->getMessage(), $exception->getCode(), $exception);
+                        throw new UnexpectedValueException('Error al inicializar el valor de `' . $this->name . '`: ' . $exception->getMessage(), $exception->getCode(), $exception);
                     }
                 }
                 return $this->rawValue;
