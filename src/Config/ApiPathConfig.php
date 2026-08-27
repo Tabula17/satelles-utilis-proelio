@@ -80,13 +80,13 @@ class ApiPathConfig extends AbstractDescriptor
                 if (is_array($value)) {
                     $value = BaseParamsCollection::fromArray($value);
                 }
-                $this->params = $value;
+                $this->options = $value;
             }
             get {
-                if (!isset($this->params)) {
-                    $this->params = new BaseParamsCollection();
+                if (!isset($this->options)) {
+                    $this->options = new BaseParamsCollection();
                 }
-                return $this->params;
+                return $this->options;
             }
         }
 
