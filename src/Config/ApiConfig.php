@@ -94,7 +94,11 @@ class ApiConfig extends ConnectionConfig
 
     public function getBaseEndpoint(): string
     {
-        return $this->protocol . '://' . $this->host . $this->basePath;
+        $baseUrl = $this->host;
+        if ($this->port !== null) {
+            $baseUrl .= ':' . $this->port;
+        }
+        return $this->protocol . '://' . $baseUrl . $this->basePath;
     }
 
     public function getAvailableEndpoints(): array
