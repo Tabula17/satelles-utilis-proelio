@@ -35,16 +35,24 @@ class BaseParamConfig extends AbstractDescriptor
                 if ($this->mutable === false && $this->isInitialized) {
                     return;
                 }
-                if (isset($this->prepareValue)) {
-                    $value = ($this->prepareValue)($value);
+                try {
+                    if (isset($this->prepareValue)) {
+                        $value = ($this->prepareValue)($value);
+                    }
+                    $this->rawValue = self::cast($value, $this->type, $this->allowNull);
+                    $this->isInitialized = true;
+                } catch (Throwable $exception) {
+                    throw new UnexpectedValueException('Error al guardar el valor de `' . $this->name . '`: ' . $exception->getMessage(), $exception->getCode(), $exception);
                 }
-                $this->rawValue = self::cast($value, $this->type, $this->allowNull);
-                $this->isInitialized = true;
             }
             get {
                 if ($this->required || $this->isInitialized) {
-                    // Si el valor es nulo y no es permitido, retornar el valor por defecto. Si no hay valor por defecto, lanzar excepción si allowNull es falso.
-                    return $this->rawValue ?? self::cast($this->defaultValue, $this->type, $this->allowNull);
+                    try {
+                        // Si el valor es nulo y no es permitido, retornar el valor por defecto. Si no hay valor por defecto, lanzar excepción si allowNull es falso.
+                        return $this->rawValue ?? self::cast($this->defaultValue, $this->type, $this->allowNull);
+                    } catch (Throwable $exception) {
+                        throw new UnexpectedValueException('Error al guardar el valor de `' . $this->name . '`: ' . $exception->getMessage(), $exception->getCode(), $exception);
+                    }
                 }
                 return $this->rawValue;
             }
