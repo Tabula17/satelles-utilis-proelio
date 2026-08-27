@@ -125,5 +125,9 @@ class BaseParamsCollection extends TypedCollection
     {
         $this->findParam($name)?->reset();
     }
+    public function hasValue(string $name): bool
+    {
+        return $this->findParam($name)?->hasValue();
+    }
 
 }
