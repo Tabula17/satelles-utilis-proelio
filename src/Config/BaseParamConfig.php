@@ -96,4 +96,10 @@ class BaseParamConfig extends AbstractDescriptor
     {
         return $this->isInitialized;
     }
+
+    public function reset(): void
+    {
+        $this->isInitialized = false;
+        $this->rawValue = null;
+    }
 }
