@@ -111,5 +111,19 @@ class BaseParamsCollection extends TypedCollection
 
         return new static(...$values);
     }
+    public function removeParam(string $name): void
+    {
+        $this->remove(fn(BaseParamConfig $param) => $param->name === $name);
+    }
+    public function reset(): void
+    {
+        foreach ($this->values as $param) {
+            $param->reset();
+        }
+    }
+    public function resetValue(string $name): void
+    {
+        $this->findParam($name)?->reset();
+    }
 
 }
