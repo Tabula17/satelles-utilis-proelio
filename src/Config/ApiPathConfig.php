@@ -55,7 +55,6 @@ class ApiPathConfig extends AbstractDescriptor
     }
     protected(set) bool $requiresAuth = false;
     protected(set) bool $pathParams = false;
-
     protected(set) string $placeholder = ':%%name%%'; //{%%name%%} // etc ;
     protected(set) BaseParamsCollection $params
         {
@@ -87,6 +86,18 @@ class ApiPathConfig extends AbstractDescriptor
                     $this->options = new BaseParamsCollection();
                 }
                 return $this->options;
+            }
+        }
+    protected(set) BaseParamsCollection $requestHeaders
+        {
+            set (BaseParamsCollection|array $value) {
+                if (is_array($value)) {
+                    $value = BaseParamsCollection::fromArray($value);
+                }
+                $this->requestHeaders = $value;
+            }
+            get {
+                return $this->requestHeaders ?? new BaseParamsCollection();
             }
         }
 
