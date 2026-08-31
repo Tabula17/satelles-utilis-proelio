@@ -114,7 +114,7 @@ class ApiPathConfig extends AbstractDescriptor
     public function getPathParamsString(bool $onlyValid = true): string
     {
         $placeholders = $this->params->getPlaceholders($onlyValid);
-        return implode('/', array_merge(...array_map(fn($k, $v) => [$k, $v], array_keys($placeholders), $placeholders)));
+        return '/' . implode('/', array_merge(...array_map(fn($k, $v) => [$k, $v], array_keys($placeholders), $placeholders)));
     }
 
     public function getEndpoint(string $baseUrl = '', bool $withParamPath = false, bool $onlyValid = true): string
