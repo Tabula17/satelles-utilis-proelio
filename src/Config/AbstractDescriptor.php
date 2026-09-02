@@ -26,13 +26,21 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
 
     public function __construct(?array $values = [])
     {
-        $reflection = new ReflectionClass(static::class);
-        $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
-        foreach ($properties as $property) {
-            $this->publicProperties[] = $property->getName();
-        }
+        $this->initPublicProperties();
         $this->loadProperties($values);
     }
+    protected function initPublicProperties(): void
+    {
+        if (!empty($this->publicProperties)) {
+            return;
+        }
+        $getPublicClassVars = static function (string $className) {
+            return get_class_vars($className);
+        };
+        $unboundGetter = $getPublicClassVars->bindTo(null, null);
+        $this->publicProperties = array_keys($unboundGetter(static::class));
+    }
+
 
     /**
      * Establece un valor para una propiedad
@@ -263,6 +271,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
 
     public function __unserialize(array $data): void
     {
+        $this->initPublicProperties();
         $this->loadProperties($data);
     }
 
