@@ -173,30 +173,6 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
     }
 
     /**
-     * Serializa un valor recursivamente
-     */
-    private function serializeValue(mixed $value): mixed
-    {
-        if (is_object($value)) {
-            if (method_exists($value, '__serialize')) {
-                return $value->__serialize();
-            }
-
-            if ($value instanceof \JsonSerializable) {
-                return $value->jsonSerialize();
-            }
-
-            if (method_exists($value, 'toArray')) {
-                return $value->toArray();
-            }
-        } elseif (is_array($value)) {
-            return array_map([$this, 'serializeValue'], $value);
-        }
-
-        return $value;
-    }
-
-    /**
      * Devuelve un array con el modelo de la clase
      * @return array
      */
@@ -263,7 +239,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
 
             // Serializar solo si el valor es diferente al default
             if ($value !== $defaultValue) {
-                $data[$property] = $this->serializeValue($value);
+                $data[$property] = $value;
             }
         }
         return $data;
