@@ -29,6 +29,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         $this->initPublicProperties();
         $this->loadProperties($values);
     }
+
     protected function initPublicProperties(): void
     {
         if (!empty($this->publicProperties)) {
@@ -193,10 +194,8 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
             } else {
                 $type = $prpopType?->getName() ?? 'mixed';
             }
-            if (is_a($type, AbstractDescriptor::class, true)) {
-                if (!in_array($type, $exclude)) {
-                    $response[$property->getName()] = $type !== static::class ? $type::getModel($exclude) : $type;
-                }
+            if (is_a($type, AbstractDescriptor::class, true) && !in_array($type, $exclude)) {
+                $response[$property->getName()] = $type::getModel($exclude);
             } else {
                 $response[$property->getName()] = $type;
             }
