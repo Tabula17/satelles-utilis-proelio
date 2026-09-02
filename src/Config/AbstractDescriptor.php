@@ -194,7 +194,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
             }
 
             if (is_a($type, AbstractDescriptor::class, true)) {
-                $response[$property->getName()] = $type::getModel();
+                $response[$property->getName()] = $type::class !== static::class ? $type::getModel() : $type::class;
             } else {
 
                 $response[$property->getName()] = $type;
