@@ -7,6 +7,7 @@ use ArrayIterator;
 use IteratorAggregate;
 use JsonSerializable;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionProperty;
 use ReflectionUnionType;
 use Traversable;
@@ -18,6 +19,9 @@ use Traversable;
  */
 abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, JsonSerializable
 {
+    // Almacén estático para cachear las propiedades por clase y evitar usar Reflection repetidamente
+    private static array $cachedPublicProperties = [];
+    private static array $cachedModels = [];
     /**
      *
      * @var array
@@ -35,13 +39,50 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         if (!empty($this->publicProperties)) {
             return;
         }
-        $getPublicClassVars = static function (string $className) {
-            return get_class_vars($className);
-        };
-        $unboundGetter = $getPublicClassVars->bindTo(null, null);
-        $this->publicProperties = array_keys($unboundGetter(static::class));
+        $className = static::class;
+
+        // Si ya analizamos esta clase específica en esta ejecución, usamos la caché
+        if (!isset(self::$cachedPublicProperties[$className])) {
+            self::analyzeClass($className);
+        }
+
+        $this->publicProperties = self::$cachedPublicProperties[$className];
     }
 
+    /**
+     * @throws ReflectionException
+     */
+    private static function analyzeClass(string $className): void
+    {
+        $reflection = new ReflectionClass($className);
+        $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
+
+        $publicList = [];
+        $modelStructure = [];
+
+        foreach ($properties as $property) {
+            $propertyName = $property->getName();
+            $publicList[] = $propertyName;
+
+            // Extraemos el tipo de la propiedad (compatible con Tipos de Unión de PHP 8.0+)
+            $propType = $property->getType();
+            if ($propType instanceof ReflectionUnionType) {
+                $typeNames = [];
+                foreach ($propType->getTypes() as $unionType) {
+                    $typeNames[] = $unionType->getName();
+                }
+                $type = implode('|', $typeNames);
+            } else {
+                $type = $propType?->getName() ?? 'mixed';
+            }
+
+            $modelStructure[$propertyName] = $type;
+        }
+
+        // Guardamos de forma permanente en memoria para el ciclo de vida del script
+        self::$cachedPublicProperties[$className] = $publicList;
+        self::$cachedModels[$className] = $modelStructure;
+    }
 
     /**
      * Establece un valor para una propiedad
@@ -50,7 +91,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
      */
     public function set(string $property, mixed $value): void
     {
-        if (property_exists($this, $property) && $this->isAccessible($property)) {
+        if ($this->isAccessible($property)) {
             $setterMethod = 'set' . ucfirst($property);
             if (method_exists($this, $setterMethod)) {
                 $this->$setterMethod($value);
@@ -175,31 +216,31 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
 
     /**
      * Devuelve un array con el modelo de la clase
+     * @param array $exclude
      * @return array
+     * @throws ReflectionException
      */
     public static function getModel(array $exclude = []): array
     {
+        $className = static::class;
+        // Si la clase no ha sido analizada aún, la procesamos
+        if (!isset(self::$cachedModels[$className])) {
+            self::analyzeClass($className);
+        }
+        // Recuperamos el modelo base precalculado desde la caché
+        $baseModel = self::$cachedModels[$className];
         $response = [];
-        $reflection = new ReflectionClass(static::class);
-        $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
-        $exclude[] = static::class;
-        foreach ($properties as $property) {
-            $prpopType = $property->getType();
-            if ($prpopType instanceof ReflectionUnionType) {
-                $type = [];
-                foreach ($prpopType->getTypes() as $unionType) {
-                    $type[] = $unionType->getName();
-                }
-                $type = implode('|', $type);
-            } else {
-                $type = $prpopType?->getName() ?? 'mixed';
-            }
+        $exclude[] = $className;
+
+        // Procesamos la recursividad dinámica para sub-modelos respetando los exclusiones ($exclude)
+        foreach ($baseModel as $propertyName => $type) {
             if (is_a($type, AbstractDescriptor::class, true) && !in_array($type, $exclude)) {
-                $response[$property->getName()] = $type::getModel($exclude);
+                $response[$propertyName] = $type::getModel($exclude);
             } else {
-                $response[$property->getName()] = $type;
+                $response[$propertyName] = $type;
             }
         }
+
         return $response;
     }
 
