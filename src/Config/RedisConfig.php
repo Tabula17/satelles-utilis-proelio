@@ -99,6 +99,33 @@ class RedisConfig extends ConnectionConfig
             $this->backoff = $isValidAlgorithm ? $value : null;
         }
     }
-
+    public function toArray(): array
+    {
+        /*
+         * host' => '127.0.0.1',
+    'port' => 6379,
+    'connectTimeout' => 2.5,
+    'auth' => ['phpredis', 'phpredis'],
+    'database' => 2,
+    'ssl' => ['verify_peer' => false],
+    'backoff' => [
+        'algorithm' => Redis::BACKOFF_ALGORITHM_DECORRELATED_JITTER,
+        'base' => 500,
+        'cap' => 750,
+    ],
+         */
+        return array_filter([
+            'host' => $this->host ?? null,
+            'port' => $this->port ?? null,
+            'connectTimeout' => $this->connectTimeout ?? null,
+            'readTimeout' => $this->readTimeout ?? null,
+            'retryInterval' => $this->retryInterval ?? null,
+            'persistent' => $this->persistent ? 'persistent' : null,
+            'auth' => $this->auth ?? null,
+            'database' => $this->database ?? null,
+            'ssl' => $this->ssl ?? null,
+            'backoff' => $this->backoff ?? null,
+        ]);
+    }
 
 }

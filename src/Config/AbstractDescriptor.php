@@ -55,7 +55,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
     private static function analyzeClass(string $className): void
     {
         $reflection = new ReflectionClass($className);
-        $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
+        $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC|ReflectionProperty::IS_PROTECTED);
 
         $publicList = [];
         $modelStructure = [];
