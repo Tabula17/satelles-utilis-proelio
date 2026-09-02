@@ -135,7 +135,7 @@ class ConnectionConfig extends AbstractDescriptor
         return $client;
     }
 
-    public function getConnector(): ?Client
+    public function getConnector(): mixed
     {
         if (isset($this->unixSocket)) {
             return $this->unixConnector();
