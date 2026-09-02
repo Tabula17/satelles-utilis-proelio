@@ -176,11 +176,12 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
      * Devuelve un array con el modelo de la clase
      * @return array
      */
-    public static function getModel(): array
+    public static function getModel(array $exclude = []): array
     {
         $response = [];
         $reflection = new ReflectionClass(static::class);
         $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC);
+        $exclude[] = static::class;
         foreach ($properties as $property) {
             $prpopType = $property->getType();
             if ($prpopType instanceof ReflectionUnionType) {
@@ -192,12 +193,11 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
             } else {
                 $type = $prpopType?->getName() ?? 'mixed';
             }
-
             if (is_a($type, AbstractDescriptor::class, true)) {
-                var_dump($type, static::class);
-                $response[$property->getName()] = $type !== static::class ? $type::getModel() : $type;
+                if (!in_array($type, $exclude)) {
+                    $response[$property->getName()] = $type !== static::class ? $type::getModel($exclude) : $type;
+                }
             } else {
-
                 $response[$property->getName()] = $type;
             }
         }
