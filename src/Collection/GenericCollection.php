@@ -81,7 +81,12 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
     {
         return $this->toArray();
     }
-
+    public function import(array $data): void
+    {
+        foreach ($data as $key => $value) {
+            $this->set($key, $value);
+        }
+    }
     /**
      * Devuelve el número de elementos en la colección.
      *
