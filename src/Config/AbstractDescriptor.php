@@ -155,25 +155,24 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
     public function toArray(): array
     {
         $data = [];
-        $properties = array_merge(array_keys(get_mangled_object_vars($this)), array_filter(self::$virtualProperties[static::class], fn($property) => isset($this->$property)) ?? []);
-        foreach ($properties as $property) { //get_object_vars
-            // foreach ($this->publicProperties as $property) {
-            if (!$this->isAccessible($property)) {
-                continue;
-            }
-            $value = $this->$property; // Llamamos al getter para obtener el valor de la propiedad (soporte para hooks!)
-            if (is_object($value) && method_exists($value, 'toArray')) {
-                $data[$property] = $value->toArray();
-            } elseif (is_object($value) && method_exists($value, 'jsonSerialize')) {
-                $data[$property] = $value->jsonSerialize();
-            } elseif ($value instanceof \UnitEnum) {
-                if ($value instanceof \BackedEnum) {
-                    $data[$property] = $value->value;
+        foreach ($this->publicProperties as $property) {
+            try {
+                $value = $this->$property; // Llamamos al getter para obtener el valor de la propiedad (soporte para hooks!)
+                if (is_object($value) && method_exists($value, 'toArray')) {
+                    $data[$property] = $value->toArray();
+                } elseif (is_object($value) && method_exists($value, 'jsonSerialize')) {
+                    $data[$property] = $value->jsonSerialize();
+                } elseif ($value instanceof \UnitEnum) {
+                    if ($value instanceof \BackedEnum) {
+                        $data[$property] = $value->value;
+                    } else {
+                        $data[$property] = $value->name;
+                    }
                 } else {
-                    $data[$property] = $value->name;
+                    $data[$property] = $value;
                 }
-            } else {
-                $data[$property] = $value;
+            } catch (\Error $ignored) {
+                // Ignoramos errores al acceder a propiedades no inicializadas. No las agregamos, ya que buscamos obtener el valor de aquellas ya definidas solamente.
             }
         }
         return $data;
