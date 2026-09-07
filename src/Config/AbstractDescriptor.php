@@ -55,7 +55,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
     private static function analyzeClass(string $className): void
     {
         $reflection = new ReflectionClass($className);
-        $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC|ReflectionProperty::IS_PROTECTED);
+        $properties = $reflection->getProperties(ReflectionProperty::IS_PUBLIC | ReflectionProperty::IS_PROTECTED);
 
         $publicList = [];
         $modelStructure = [];
@@ -149,7 +149,8 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
     public function toArray(): array
     {
         $data = [];
-        foreach (get_object_vars($this) as $property => $v) { //get_object_vars
+        //foreach (get_mangled_object_vars($this) as $property => $v) { //get_object_vars
+        foreach ($this->publicProperties as $property) {
             if (!$this->isAccessible($property)) {
                 continue;
             }
