@@ -6,7 +6,7 @@ use BcMath\Number;
 use DateTimeImmutable;
 use Throwable;
 
-enum DataTypes: string
+enum DataTypes: string implements HydratorInterface
 {
     case BOOL = 'bool';
     case NULL = 'null';
@@ -55,7 +55,7 @@ enum DataTypes: string
         };
     }
 
-    public function hydrator(mixed $value): mixed
+    public function hydrate(mixed $value): mixed
     {
         $dateTimeHandler = static function (string $value) {
             try {
