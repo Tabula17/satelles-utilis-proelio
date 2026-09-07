@@ -22,6 +22,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
     // Almacén estático para cachear las propiedades por clase y evitar usar Reflection repetidamente
     private static array $cachedPublicProperties = [];
     private static array $cachedModels = [];
+    private static array $virtualProperties = [];
     /**
      *
      * @var array
@@ -59,10 +60,14 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
 
         $publicList = [];
         $modelStructure = [];
+        $virtualList = [];
 
         foreach ($properties as $property) {
             $propertyName = $property->getName();
             $publicList[] = $propertyName;
+            if ($property->isVirtual()) {
+                $virtualList[] = $propertyName;
+            }
 
             // Extraemos el tipo de la propiedad (compatible con Tipos de Unión de PHP 8.0+)
             $propType = $property->getType();
@@ -82,6 +87,7 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
         // Guardamos de forma permanente en memoria para el ciclo de vida del script
         self::$cachedPublicProperties[$className] = $publicList;
         self::$cachedModels[$className] = $modelStructure;
+        self::$virtualProperties[$className] = $virtualList;
     }
 
     /**
@@ -149,8 +155,9 @@ abstract class AbstractDescriptor implements ArrayAccess, IteratorAggregate, Jso
     public function toArray(): array
     {
         $data = [];
-        //foreach (get_mangled_object_vars($this) as $property => $v) { //get_object_vars
-        foreach ($this->publicProperties as $property) {
+        $properties = array_merge(array_keys(get_mangled_object_vars($this)), array_filter(self::$virtualProperties[static::class], fn($property) => isset($this->$property)) ?? []);
+        foreach ($properties as $property) { //get_object_vars
+            // foreach ($this->publicProperties as $property) {
             if (!$this->isAccessible($property)) {
                 continue;
             }
