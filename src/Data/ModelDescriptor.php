@@ -47,5 +47,14 @@ class ModelDescriptor extends AbstractDescriptor
         $this->hydrate = $hydrate ?? $dataTypes->hydrate(...);
         parent::__construct();
     }
-
+    public function withHydrate(Closure $hydrate): static
+    {
+        return new static(
+            title: $this->title,
+            description: $this->description,
+            dataTypes: $this->dataTypes,
+            format: $this->format,
+            hydrate: $hydrate
+        );
+    }
 }
