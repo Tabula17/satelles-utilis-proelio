@@ -39,7 +39,7 @@ trait SerializableCollectionTrait
         }
 
         // Segundo: JsonSerializable
-        if ($object instanceof JsonSerializable) {
+        if ($object instanceof JsonSerializable && !$object instanceof \UnitEnum) {
             return $object->jsonSerialize();
         }
 
