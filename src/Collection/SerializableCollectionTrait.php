@@ -48,7 +48,7 @@ trait SerializableCollectionTrait
         $reflection = new \ReflectionClass($object);
 
         foreach ($reflection->getProperties() as $property) {
-            $property->setAccessible(true);
+           // $property->setAccessible(true);
             $data[$property->getName()] = $property->getValue($object);
         }
 
@@ -101,7 +101,7 @@ trait SerializableCollectionTrait
             foreach ($data as $property => $value) {
                 if ($reflection->hasProperty($property)) {
                     $prop = $reflection->getProperty($property);
-                    $prop->setAccessible(true);
+                    // $prop->setAccessible(true);
                     $prop->setValue($object, $value);
                 } elseif (property_exists($object, $property)) {
                     $object->$property = $value;
