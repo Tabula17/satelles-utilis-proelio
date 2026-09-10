@@ -123,7 +123,7 @@ class RedisConfig extends ConnectionConfig
 
     public function getConnector(): mixed
     {
-        return new Redis(...$this->toArray());
+        return new Redis($this->toArray());
     }
 
 }
