@@ -75,4 +75,15 @@ class ConnectionCollection extends TypedCollection
     {
         return new static(...array_filter($this->values, static fn(ConnectionConfig $config) => !$config->canConnect()));
     }
+
+    /**
+     * @throws UnexpectedValueException
+     */
+    public function fromArray(array $config): static
+    {
+       // return new static(...array_map(static fn($item) => ConnectionConfig::fromArray($item), $config));
+        $type = static::getType();
+
+        return new static(...array_map(static fn($item) => $item instanceof $type ? $item : new $type($item), $config));
+    }
 }
