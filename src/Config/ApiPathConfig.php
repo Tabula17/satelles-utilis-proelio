@@ -106,7 +106,14 @@ class ApiPathConfig extends AbstractDescriptor
                 return $this->requestHeaders ?? new BaseParamsCollection();
             }
         }
-    protected(set) readonly string $baseUrl;
+    protected(set) string $baseUrl
+        {
+            set {
+                if (!isset($this->baseUrl)) {
+                    $this->baseUrl = rtrim($value, '/');
+                }
+            }
+        }
 
 
     public function getQueryString(bool $onlyValid = true, bool $withPlaceholders = false): string
