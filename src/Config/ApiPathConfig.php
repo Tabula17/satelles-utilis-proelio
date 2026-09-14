@@ -60,12 +60,15 @@ class ApiPathConfig extends AbstractDescriptor
         {
             set (BaseParamsCollection|array $value) {
                 if (is_array($value)) {
-                    if (!isset($value['xclass'])) {
-                        $value['xclass'] = ApiParam::class;
-                        if ($this->pathParams && !array_key_exists('pathParam', $value) && !array_key_exists('queryParam', $value)) {
-                            $value['pathParam'] = true;
+                    foreach ($value as $param){
+                        if (!isset($param['xclass'])) {
+                            $param['xclass'] = ApiParam::class;
+                            if ($this->pathParams && !array_key_exists('pathParam', $param) && !array_key_exists('queryParam', $param)) {
+                                $param['pathParam'] = true;
+                            }
                         }
                     }
+
                     $value = BaseParamsCollection::fromArray($value);
                 }
                 $value->setPlaceholderMask($this->placeholder);
