@@ -68,7 +68,7 @@ class ApiPathConfig extends AbstractDescriptor
                             }
                         }
                     }
-
+                    var_dump($value);
                     $value = BaseParamsCollection::fromArray($value);
                 }
                 $value->setPlaceholderMask($this->placeholder);
