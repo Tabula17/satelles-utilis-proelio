@@ -44,7 +44,7 @@ class ApiPathsCollection extends TypedCollection
                 if ($baseUrl) {
                     $item['baseUrl'] = $baseUrl;
                 }
-                $values[$key] = static::cast($item);
+                $values[$key] = static::cast($item, ApiPathConfig::class, true);
             } catch (Throwable $e) {
                 continue;
             }

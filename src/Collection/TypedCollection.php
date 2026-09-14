@@ -43,10 +43,10 @@ abstract class TypedCollection extends GenericCollection
     /**
      * @throws UnexpectedValueException
      */
-    public static function cast(mixed $value, ?string $type = null)
+    public static function cast(mixed $value, ?string $type = null, bool $throw = false)
     {
         $class = static::getType();
-        return static::__cast($value, $type ?? $class);
+        return static::__cast($value, $type ?? $class, !$throw);
     }
 
     public function add(mixed $value): void
