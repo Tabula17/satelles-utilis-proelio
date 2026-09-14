@@ -106,11 +106,7 @@ class ApiPathConfig extends AbstractDescriptor
                 return $this->requestHeaders ?? new BaseParamsCollection();
             }
         }
-
-    public function __construct(private readonly string $baseUrl = '')
-    {
-        parent::__construct();
-    }
+    private(set) readonly string $baseUrl;
 
 
     public function getQueryString(bool $onlyValid = true, bool $withPlaceholders = false): string
