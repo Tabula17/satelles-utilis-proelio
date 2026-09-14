@@ -44,7 +44,7 @@ class ApiPathsCollection extends TypedCollection
                 if ($baseUrl) {
                     $item['baseUrl'] = $baseUrl;
                 }
-               // echo $key . '=>>' . var_export($item, true) . PHP_EOL;
+                echo $key . '=>> cast to ' . ApiPathConfig::class . PHP_EOL;
                 $values[$key] = static::cast($item, ApiPathConfig::class, true);
                 echo $key . '<<<<' . get_class($values[$key]) . PHP_EOL;
             } catch (Throwable $e) {
