@@ -49,7 +49,7 @@ class ApiPathsCollection extends TypedCollection
                 if(!$values[$key] instanceof ApiPathConfig){
                     echo "Falló CAST en $key => {$item['name']}".PHP_EOL;
                 }
-                echo $key . '<<<<' . get_class($values[$key]) . PHP_EOL;
+                echo $key . "<<<< $key: " . get_class($values[$key]) . PHP_EOL;
             } catch (Throwable $e) {
                 continue;
             }
