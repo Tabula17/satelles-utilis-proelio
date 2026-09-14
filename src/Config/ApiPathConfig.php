@@ -60,6 +60,12 @@ class ApiPathConfig extends AbstractDescriptor
         {
             set (BaseParamsCollection|array $value) {
                 if (is_array($value)) {
+                    if (!isset($value['xclass'])) {
+                        $value['xclass'] = ApiParam::class;
+                        if ($this->pathParams && !array_key_exists('pathParam', $value) && !array_key_exists('queryParam', $value)) {
+                            $value['pathParam'] = true;
+                        }
+                    }
                     $value = BaseParamsCollection::fromArray($value);
                 }
                 $value->setPlaceholderMask($this->placeholder);
@@ -101,24 +107,50 @@ class ApiPathConfig extends AbstractDescriptor
             }
         }
 
-    public function getQueryString(bool $onlyValid = true): string
+    public function __construct(private readonly string $baseUrl = '')
     {
-        return http_build_query($this->params->getValues($onlyValid));
+        parent::__construct();
     }
 
-    public function getQueryStringWithPlaceholder(bool $onlyValid = true): string
+
+    public function getQueryString(bool $onlyValid = true, bool $withPlaceholders = false): string
     {
-        return http_build_query($this->params->getPlaceholders($onlyValid));
+        $params = $this->getQueryParams();
+        return http_build_query($withPlaceholders ? $params->getPlaceholders($onlyValid) : $params->getValues($onlyValid));
     }
 
-    public function getPathParamsString(bool $onlyValid = true): string
+    public function getPathParamsString(bool $onlyValid = true, bool $withPlaceholders = false): string
     {
-        $placeholders = $this->params->getPlaceholders($onlyValid);
-        return '/' . implode('/', array_merge(...array_map(fn($k, $v) => [$k, $v], array_keys($placeholders), $placeholders)));
+        $pathParams = $this->getPathParams();
+        $params = $withPlaceholders ? $pathParams->getPlaceholders($onlyValid) : $pathParams->getValues($onlyValid);
+        return '/' . implode('/', array_merge(...array_map(fn($k, $v) => [$k, $v], array_keys($params), $params)));
     }
 
-    public function getEndpoint(string $baseUrl = '', bool $withParamPath = false, bool $onlyValid = true): string
+    public function getPathParams(): BaseParamsCollection
     {
-        return rtrim($baseUrl, '/') . $this->path . ($withParamPath && $this->pathParams ? $this->getPathParamsString($onlyValid) : '');
+        return $this->params->filter(fn($value, $key) => $value instanceof ApiParam && $value->pathParam);
     }
+
+    public function getQueryParams(): BaseParamsCollection
+    {
+        return $this->params->filter(fn($value, $key) => $value instanceof ApiParam ? $value->queryParam : true);
+    }
+
+    public function endpointUrl(bool $withPathParams = false, bool $withPlaceholders = false): string
+    {
+        if ($withPathParams) {
+            $pathParams = $this->getPathParams();
+            if ($pathParams) {
+                $paths = [];
+                $pathParams->each(function ($value, $key) use ($withPlaceholders, &$paths) {
+                    if ($value->required || $value->hasValue()) {
+                        $paths[] = ($value->pathWithKey ? $value->name . '/' : '') . ($withPlaceholders ? $value->placeholder : $value->value);
+                    }
+                });
+                return rtrim($this->baseUrl, '/') . '/' . implode('/', $paths) . $this->path;
+            }
+        }
+        return rtrim($this->baseUrl, '/') . $this->path;
+    }
+
 }

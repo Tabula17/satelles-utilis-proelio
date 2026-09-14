@@ -99,7 +99,6 @@ class BaseParamsCollection extends TypedCollection
     public static function fromArray(array $config): static
     {
         $values = [];
-
         foreach ($config as $key => $item) {
             //  echo "Adding param: $key with value: ".var_export($item, true)."\n";
             try {
