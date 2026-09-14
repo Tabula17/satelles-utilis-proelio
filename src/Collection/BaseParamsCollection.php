@@ -101,9 +101,15 @@ class BaseParamsCollection extends TypedCollection
         $values = [];
 
         foreach ($config as $key => $item) {
-          //  echo "Adding param: $key with value: ".var_export($item, true)."\n";
+            //  echo "Adding param: $key with value: ".var_export($item, true)."\n";
             try {
-                $values[$key] = static::cast($item);
+                if (is_array($item) && array_key_exists('xclass', $item) && class_exists($item['xclass'])) {
+                    $xclass = $item['xclass'];
+                    unset($item['xclass']);
+                    $values[$key] = static::cast($item, $xclass);
+                } else {
+                    $values[$key] = static::cast($item);
+                }
             } catch (\Throwable $e) {
                 continue;
             }
@@ -111,20 +117,24 @@ class BaseParamsCollection extends TypedCollection
 
         return new static(...$values);
     }
+
     public function removeParam(string $name): void
     {
         $this->remove(fn(BaseParamConfig $param) => $param->name === $name);
     }
+
     public function reset(): void
     {
         foreach ($this->values as $param) {
             $param->reset();
         }
     }
+
     public function resetValue(string $name): void
     {
         $this->findParam($name)?->reset();
     }
+
     public function hasValue(string $name): bool
     {
         return $this->findParam($name)?->hasValue();
