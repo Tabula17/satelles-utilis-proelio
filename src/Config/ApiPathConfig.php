@@ -60,7 +60,7 @@ class ApiPathConfig extends AbstractDescriptor
         {
             set (BaseParamsCollection|array $value) {
                 if (is_array($value)) {
-                    foreach ($value as $key => $param){
+                    foreach ($value as $key => $param) {
                         if (!isset($param['xclass'])) {
                             $value[$key]['xclass'] = ApiParam::class;
                             if ($this->pathParams && !array_key_exists('pathParam', $param) && !array_key_exists('queryParam', $param)) {
@@ -152,7 +152,7 @@ class ApiPathConfig extends AbstractDescriptor
                         $paths[] = ($value->pathWithKey ? $value->name . '/' : '') . ($withPlaceholders ? $value->placeholder : $value->value);
                     }
                 });
-                return rtrim($this->baseUrl, '/') . '/' . implode('/', $paths) . $this->path;
+                return rtrim($this->baseUrl, '/') . '/' . $this->path . '/' . implode('/', $paths);
             }
         }
         return rtrim($this->baseUrl, '/') . $this->path;
