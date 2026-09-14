@@ -44,12 +44,12 @@ class ApiPathsCollection extends TypedCollection
                 if ($baseUrl) {
                     $item['baseUrl'] = $baseUrl;
                 }
-                echo $key . '=>> cast to ' . ApiPathConfig::class . PHP_EOL;
+                echo $key . ' =>> cast to ' . ApiPathConfig::class . PHP_EOL;
                 $values[$key] = static::cast($item, ApiPathConfig::class, true);
                 if(!$values[$key] instanceof ApiPathConfig){
                     echo "Falló CAST en $key => {$item['name']}".PHP_EOL;
                 }
-                echo $key . "<<<< $key: " . get_class($values[$key]) . PHP_EOL;
+                echo $key . " <<<< {$item['name']}: " . get_class($values[$key]) . PHP_EOL;
             } catch (Throwable $e) {
                 continue;
             }
