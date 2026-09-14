@@ -100,7 +100,7 @@ class BaseParamsCollection extends TypedCollection
     {
         $values = [];
         foreach ($config as $key => $item) {
-            //  echo "Adding param: $key with value: ".var_export($item, true)."\n";
+              echo "Adding param: $key with value: ".var_export($item, true)."\n";
             try {
                 if (is_array($item) && array_key_exists('xclass', $item) && class_exists($item['xclass'])) {
                     $xclass = $item['xclass'];
