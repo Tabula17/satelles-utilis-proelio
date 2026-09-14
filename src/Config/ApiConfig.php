@@ -61,7 +61,7 @@ class ApiConfig extends ConnectionConfig
         {
             set (ApiPathsCollection|array $value) {
                 if (is_array($value)) {
-                    $value = ApiPathsCollection::fromArray($value);
+                    $value = ApiPathsCollection::fromArray($value, $this->getBaseEndpoint());
                 }
                 $this->apiPaths = $value;
             }

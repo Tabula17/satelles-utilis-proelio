@@ -35,12 +35,15 @@ class ApiPathsCollection extends TypedCollection
         return $this->map(fn(ApiPathConfig $config) => $config->name);
     }
 
-    public static function fromArray(array $config): static
+    public static function fromArray(array $config, ?string $baseUrl = null): static
     {
         $values = [];
 
         foreach ($config as $key => $item) {
             try {
+                if ($baseUrl) {
+                    $item['baseUrl'] = $baseUrl;
+                }
                 $values[$key] = static::cast($item);
             } catch (Throwable $e) {
                 continue;
