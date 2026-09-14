@@ -46,6 +46,9 @@ class ApiPathsCollection extends TypedCollection
                 }
                 echo $key . '=>> cast to ' . ApiPathConfig::class . PHP_EOL;
                 $values[$key] = static::cast($item, ApiPathConfig::class, true);
+                if(!$values[$key] instanceof ApiPathConfig){
+                    echo "Falló CAST en $key => {$item['name']}".PHP_EOL;
+                }
                 echo $key . '<<<<' . get_class($values[$key]) . PHP_EOL;
             } catch (Throwable $e) {
                 continue;
