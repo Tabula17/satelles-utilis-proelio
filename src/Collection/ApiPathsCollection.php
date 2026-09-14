@@ -41,6 +41,10 @@ class ApiPathsCollection extends TypedCollection
 
         foreach ($config as $key => $item) {
             try {
+                if ($baseUrl) {
+                    $item['baseUrl'] = $baseUrl;
+                }
+                echo $key . '=>>' . var_export($item, true) . PHP_EOL;
                 $values[$key] = static::cast($item, ApiPathConfig::class, true);
             } catch (Throwable $e) {
                 continue;
