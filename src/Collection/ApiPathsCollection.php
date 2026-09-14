@@ -41,9 +41,6 @@ class ApiPathsCollection extends TypedCollection
 
         foreach ($config as $key => $item) {
             try {
-                if ($baseUrl) {
-                    $item['baseUrl'] = $baseUrl;
-                }
                 $values[$key] = static::cast($item, ApiPathConfig::class, true);
             } catch (Throwable $e) {
                 continue;
