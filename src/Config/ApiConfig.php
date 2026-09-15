@@ -23,6 +23,18 @@ class ApiConfig extends ConnectionConfig
             }
         }
     public string $protocol = 'http';
+    protected(set) string $version = '1.0.0'
+        {
+            set {
+                $value = ltrim($value, 'v');
+                // Official SemVer 2.0.0 regex for PCRE (PHP)
+                $regex = '/^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/';
+                if (!preg_match($regex, $value)) {
+                    throw new \InvalidArgumentException('La versión indicada no cumple con el formato SemVer 2.0.0.');
+                }
+                $this->version = $value;
+            }
+        }
     protected(set) array $headers = [
         "Accept" => "application/json",
         "Content-Type" => "application/json"
