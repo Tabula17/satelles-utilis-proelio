@@ -8,6 +8,7 @@ use Tabula17\Satelles\Utilis\Collection\BaseParamsCollection;
 class ApiPathConfig extends AbstractDescriptor
 {
     protected(set) string $name;
+    protected(set) ?string $description = null;
     protected(set) string $path {
         set {
             $this->path = '/' . ltrim($value, '/');
@@ -152,7 +153,7 @@ class ApiPathConfig extends AbstractDescriptor
                         $paths[] = ($value->pathWithKey ? $value->name . '/' : '') . ($withPlaceholders ? $value->placeholder : $value->value);
                     }
                 });
-                return rtrim($this->baseUrl, '/') . '/' . trim($this->path, '/') . '/' . ltrim(implode('/', $paths). '/');
+                return rtrim($this->baseUrl, '/') . '/' . trim($this->path, '/') . '/' . ltrim(implode('/', $paths) . '/');
             }
         }
         return rtrim($this->baseUrl, '/') . $this->path;
