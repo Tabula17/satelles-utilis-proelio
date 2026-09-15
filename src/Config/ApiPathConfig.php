@@ -9,6 +9,7 @@ class ApiPathConfig extends AbstractDescriptor
 {
     protected(set) string $name;
     protected(set) ?string $description = null;
+    protected(set) ?string $responseDescription = null;
     protected(set) string $path {
         set {
             $this->path = '/' . ltrim($value, '/');
