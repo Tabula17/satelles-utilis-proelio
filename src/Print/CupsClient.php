@@ -471,7 +471,7 @@ class CupsClient
             );
         }
 
-        // Request ID
+        // ApiRequest ID
         $result['request-id'] = unpack('Nid', substr($response, $offset, 4))['id'];
         $offset += 4;
 
