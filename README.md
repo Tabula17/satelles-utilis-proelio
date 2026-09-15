@@ -41,8 +41,7 @@ Below are minimal examples for the main components currently present in `src/`.
 `Tabula17\Satelles\Utilis\Cache\RedisStorage` implements a simple key/value cache on Redis and uses `Tabula17\Satelles\Utilis\Config\RedisConfig` for connection options.
 
 ```php
-use Tabula17\Satelles\Utilis\Cache\RedisStorage;
-use Tabula17\Satelles\Utilis\Config\RedisConfig;
+use Tabula17\Satelles\Utilis\Cache\RedisStorage;use Tabula17\Satelles\Utilis\Config\RedisConfig;
 
 $config = new RedisConfig([
     'host' => '127.0.0.1',
