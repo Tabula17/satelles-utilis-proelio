@@ -16,6 +16,8 @@ enum MimeTypes implements EnumMethodsInterface, JsonSerializable
     case CSV;
     case TSV;
 
+    case FORM;
+
     case JPG;
     case PNG;
     case GIF;
@@ -90,6 +92,17 @@ enum MimeTypes implements EnumMethodsInterface, JsonSerializable
     public function isTextBased(): bool
     {
         return MimeTypeDefinitions::isTextBased($this);
+    }
+
+    public function isJson(): bool
+    {
+        return $this === self::JSON;
+    }
+
+    public function isFormData()
+    {
+        return $this === self::FORM;
+
     }
 
     public static function fromExtension(string $extension): self

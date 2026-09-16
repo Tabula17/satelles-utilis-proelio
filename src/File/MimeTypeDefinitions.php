@@ -96,6 +96,11 @@ final class MimeTypeDefinitions
                 'extensions' => ['html', 'htm'],
                 'extension' => 'html',
             ],
+            'FORM' => [
+                'mime' => 'multipart/form-data',
+                'extensions' => [],
+                'extension' => 'form'
+            ],
             'CSS' => [
                 'mime' => 'text/css',
                 'extensions' => ['css'],
