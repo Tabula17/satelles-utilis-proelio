@@ -16,7 +16,7 @@ enum MimeTypes implements EnumMethodsInterface, JsonSerializable
     case CSV;
     case TSV;
 
-    case FORM;
+    case MULTIPARTFORM;
 
     case JPG;
     case PNG;
@@ -99,9 +99,9 @@ enum MimeTypes implements EnumMethodsInterface, JsonSerializable
         return $this === self::JSON;
     }
 
-    public function isFormData()
+    public function isMultipartFormData(): bool
     {
-        return $this === self::FORM;
+        return $this === self::MULTIPARTFORM;
 
     }
 
