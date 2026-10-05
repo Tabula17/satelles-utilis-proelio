@@ -13,7 +13,7 @@ class InstanceTypedCollection extends GenericCollection
         cast as protected __cast;
     }
 
-    public function __construct(private readonly string $type)
+    public function __construct(protected readonly string $type)
     {
     }
 
