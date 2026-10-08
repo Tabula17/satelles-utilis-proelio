@@ -368,6 +368,9 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
      */
     public function first(): mixed
     {
+        if($this->isEmpty()) {
+            return null;
+        }
         return $this->values[array_key_first($this->values)] ?? null;
     }
 
@@ -378,6 +381,9 @@ abstract class GenericCollection implements IteratorAggregate, ArrayAccess, Json
      */
     public function last(): mixed
     {
+        if($this->isEmpty()) {
+            return null;
+        }
         return $this->values[array_key_last($this->values)] ?? null;
     }
 
