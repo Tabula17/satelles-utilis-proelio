@@ -3,7 +3,9 @@
 namespace Tabula17\Satelles\Utilis\Job;
 
 use Throwable;
-
+/**
+ * @template T of AbstractJobResult
+ */
 interface JobQueueInterface
 {
     public function push(AbstractJob $job): string;
@@ -20,10 +22,19 @@ interface JobQueueInterface
 
     public function storeResult(AbstractJobResult $result): void;
 
+    /**
+     * @return T|null
+     */
     public function pullResult(string $jobId): ?AbstractJobResult;
 
+    /**
+     * @return T|null
+     */
     public function getResult(string $jobId): ?AbstractJobResult;
 
+    /**
+     * @return T|null
+     */
     public function popResult(?float $timeout = null): ?AbstractJobResult;
 
     public function getFailure(string $jobId): ?Throwable;
