@@ -5,11 +5,15 @@ namespace Tabula17\Satelles\Utilis\Job;
 use Throwable;
 /**
  * @template T of AbstractJobResult
+ * @template TJob of AbstractJob
  */
 interface JobQueueInterface
 {
     public function push(AbstractJob $job): string;
 
+    /**
+     * @return TJob|null
+     */
     public function pop(?float $timeout = null): ?AbstractJob;
 
     public function ack(string $jobId): void;
