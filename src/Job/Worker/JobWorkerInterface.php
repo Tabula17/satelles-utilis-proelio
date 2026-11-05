@@ -5,6 +5,9 @@ namespace Tabula17\Satelles\Utilis\Job\Worker;
 use Tabula17\Satelles\Utilis\Job\AbstractJob;
 use Tabula17\Satelles\Utilis\Job\AbstractJobResult;
 
+/**
+ * @template T of AbstractJobResult
+ */
 interface JobWorkerInterface
 {
     public function start(int $workers = 1): void;
@@ -13,5 +16,8 @@ interface JobWorkerInterface
 
     public function isRunning(): bool;
 
+    /**
+     * @return T
+     */
     public function process(AbstractJob $job): AbstractJobResult;
 }

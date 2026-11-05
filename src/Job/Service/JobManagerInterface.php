@@ -6,6 +6,9 @@ use Tabula17\Satelles\Utilis\Job\AbstractJob;
 use Tabula17\Satelles\Utilis\Job\AbstractJobResult;
 use Throwable;
 
+/**
+ * @template T of AbstractJobResult
+ */
 interface JobManagerInterface
 {
     public function start(int $workers = 1): void;
@@ -14,10 +17,19 @@ interface JobManagerInterface
 
     public function submit(AbstractJob $job): string;
 
+    /**
+     * @return T|null
+     */
     public function getResult(string $jobId): ?AbstractJobResult;
 
+    /**
+     * @return T|null
+     */
     public function waitForResult(string $jobId, int $timeoutSeconds = 30, int $pollIntervalMs = 200): ?AbstractJobResult;
 
+    /**
+     * @return T|null
+     */
     public function processJob(AbstractJob $job): ?AbstractJobResult;
 
     public function hasResult(string $jobId): bool;
@@ -29,6 +41,5 @@ interface JobManagerInterface
     public function cancelJob(string $jobId): void;
 
     public function jobExists(string $jobId): bool;
-
     public function stats(): array;
 }
