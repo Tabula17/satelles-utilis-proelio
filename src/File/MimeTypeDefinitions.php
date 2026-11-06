@@ -15,15 +15,24 @@ final class MimeTypeDefinitions
     {
         return self::definitions()[$type->name]['extension'] ?? 'bin';
     }
+
+    public static function extensions(MimeTypes $type): array
+    {
+        return self::definitions()[$type->name]['extensions'] ?? [];
+    }
+
     public static function extensionExists(string $extension): bool
     {
+        $extension = strtolower(ltrim($extension, '.'));
+
         return isset(self::extensionLookup()[$extension]);
     }
+
     public static function fromExtension(string $extension): ?MimeTypes
     {
         $extension = strtolower(ltrim($extension, '.'));
 
-        return self::extensionLookup()[$extension] /*?? MimeTypes::BIN*/;
+        return self::extensionLookup()[$extension] ?? null;
     }
 
     public static function fromFile(string $file): MimeTypes
@@ -34,13 +43,18 @@ final class MimeTypeDefinitions
             return MimeTypes::BIN;
         }
 
-        return self::fromExtension($extension);
+        return self::fromExtension($extension) ?? MimeTypes::BIN;
     }
 
     public static function fromMime(string $value): ?MimeTypes
     {
+        $cleanMime = strtolower(trim(explode(';', $value)[0]));
+
         foreach (self::definitions() as $name => $definition) {
-            if ($definition['mime'] === $value) {
+            if ($definition['mime'] === $cleanMime) {
+                return constant(MimeTypes::class . '::' . $name);
+            }
+            if (isset($definition['mimes']) && in_array($cleanMime, $definition['mimes'], true)) {
                 return constant(MimeTypes::class . '::' . $name);
             }
         }
@@ -50,6 +64,26 @@ final class MimeTypeDefinitions
     public static function isTextBased(MimeTypes $type): bool
     {
         return isset(self::textBasedSet()[$type->name]);
+    }
+
+    public static function isOpenOffice(MimeTypes $type): bool
+    {
+        return self::isOpenDocument($type);
+    }
+
+    public static function isOpenDocument(MimeTypes $type): bool
+    {
+        return isset(self::openDocumentSet()[$type->name]);
+    }
+
+    public static function isOpenOfficeCompatible(MimeTypes $type): bool
+    {
+        return isset(self::openOfficeCompatibleSet()[$type->name]);
+    }
+
+    public static function isLibreOfficeCompatible(MimeTypes $type): bool
+    {
+        return self::isOpenOfficeCompatible($type);
     }
 
     private static function extensionLookup(): array
@@ -80,11 +114,120 @@ final class MimeTypeDefinitions
             'CSS' => true,
             'JS' => true,
             'JSON' => true,
+            'JSONLD' => true,
             'XML' => true,
             'TXT' => true,
             'CSV' => true,
             'TSV' => true,
+            'MD' => true,
+            'YAML' => true,
+            'RTF' => true,
+            'SQL' => true,
+            'ICS' => true,
+            'VCF' => true,
             'SVG' => true,
+        ];
+    }
+
+    private static function openDocumentSet(): array
+    {
+        return [
+            // OpenDocument Formats (ODF)
+            'ODT' => true,
+            'OTT' => true,
+            'ODM' => true,
+            'OTH' => true,
+            'ODS' => true,
+            'OTS' => true,
+            'ODP' => true,
+            'OTP' => true,
+            'ODG' => true,
+            'OTG' => true,
+            'ODF' => true,
+            'ODB' => true,
+            // StarOffice / OpenOffice legacy formats
+            'SXW' => true,
+            'STW' => true,
+            'SXC' => true,
+            'STC' => true,
+            'SXI' => true,
+            'STI' => true,
+            'SXD' => true,
+            'SXM' => true,
+        ];
+    }
+
+    private static function openOfficeCompatibleSet(): array
+    {
+        return [
+            // OpenDocument / OpenOffice / StarOffice
+            'ODT' => true,
+            'OTT' => true,
+            'ODM' => true,
+            'OTH' => true,
+            'ODS' => true,
+            'OTS' => true,
+            'ODP' => true,
+            'OTP' => true,
+            'ODG' => true,
+            'OTG' => true,
+            'ODF' => true,
+            'ODB' => true,
+            'SXW' => true,
+            'STW' => true,
+            'SXC' => true,
+            'STC' => true,
+            'SXI' => true,
+            'STI' => true,
+            'SXD' => true,
+            'SXM' => true,
+
+            // Microsoft Office
+            'DOC' => true,
+            'DOCX' => true,
+            'DOCM' => true,
+            'DOT' => true,
+            'DOTX' => true,
+            'DOTM' => true,
+            'XLS' => true,
+            'XLSX' => true,
+            'XLSM' => true,
+            'XLT' => true,
+            'XLTX' => true,
+            'XLTM' => true,
+            'XLSB' => true,
+            'PPT' => true,
+            'PPTX' => true,
+            'PPTM' => true,
+            'POT' => true,
+            'POTX' => true,
+            'POTM' => true,
+            'PPS' => true,
+            'PPSX' => true,
+            'PPSM' => true,
+            'VSD' => true,
+            'VSDX' => true,
+
+            // Document & Interchange formats
+            'RTF' => true,
+            'TXT' => true,
+            'CSV' => true,
+            'TSV' => true,
+            'HTML' => true,
+            'XML' => true,
+            'EPUB' => true,
+            'PDF' => true,
+
+            // Image formats supported by LibreOffice Draw / Writer / Impress for conversions
+            'SVG' => true,
+            'WMF' => true,
+            'EMF' => true,
+            'BMP' => true,
+            'JPG' => true,
+            'PNG' => true,
+            'GIF' => true,
+            'TIFF' => true,
+            'WEBP' => true,
         ];
     }
 
@@ -99,7 +242,7 @@ final class MimeTypeDefinitions
             'MULTIPARTFORM' => [
                 'mime' => 'multipart/form-data',
                 'extensions' => [],
-                'extension' => 'mform'
+                'extension' => 'mform',
             ],
             'CSS' => [
                 'mime' => 'text/css',
@@ -115,6 +258,11 @@ final class MimeTypeDefinitions
                 'mime' => 'application/json',
                 'extensions' => ['json'],
                 'extension' => 'json',
+            ],
+            'JSONLD' => [
+                'mime' => 'application/ld+json',
+                'extensions' => ['jsonld'],
+                'extension' => 'jsonld',
             ],
             'XML' => [
                 'mime' => 'application/xml',
@@ -135,6 +283,38 @@ final class MimeTypeDefinitions
                 'mime' => 'text/tab-separated-values',
                 'extensions' => ['tsv'],
                 'extension' => 'tsv',
+            ],
+            'MD' => [
+                'mime' => 'text/markdown',
+                'extensions' => ['md', 'markdown'],
+                'extension' => 'md',
+            ],
+            'YAML' => [
+                'mime' => 'application/yaml',
+                'mimes' => ['text/yaml'],
+                'extensions' => ['yaml', 'yml'],
+                'extension' => 'yaml',
+            ],
+            'RTF' => [
+                'mime' => 'application/rtf',
+                'mimes' => ['text/rtf', 'application/x-rtf'],
+                'extensions' => ['rtf'],
+                'extension' => 'rtf',
+            ],
+            'SQL' => [
+                'mime' => 'application/sql',
+                'extensions' => ['sql'],
+                'extension' => 'sql',
+            ],
+            'ICS' => [
+                'mime' => 'text/calendar',
+                'extensions' => ['ics', 'ical'],
+                'extension' => 'ics',
+            ],
+            'VCF' => [
+                'mime' => 'text/vcard',
+                'extensions' => ['vcf', 'vcard'],
+                'extension' => 'vcf',
             ],
             'JPG' => [
                 'mime' => 'image/jpeg',
@@ -181,10 +361,40 @@ final class MimeTypeDefinitions
                 'extensions' => ['tif', 'tiff'],
                 'extension' => 'tif',
             ],
+            'HEIC' => [
+                'mime' => 'image/heic',
+                'extensions' => ['heic'],
+                'extension' => 'heic',
+            ],
+            'HEIF' => [
+                'mime' => 'image/heif',
+                'extensions' => ['heif'],
+                'extension' => 'heif',
+            ],
+            'PSD' => [
+                'mime' => 'image/vnd.adobe.photoshop',
+                'extensions' => ['psd'],
+                'extension' => 'psd',
+            ],
+            'WMF' => [
+                'mime' => 'image/wmf',
+                'extensions' => ['wmf'],
+                'extension' => 'wmf',
+            ],
+            'EMF' => [
+                'mime' => 'image/emf',
+                'extensions' => ['emf'],
+                'extension' => 'emf',
+            ],
             'PDF' => [
                 'mime' => 'application/pdf',
                 'extensions' => ['pdf'],
                 'extension' => 'pdf',
+            ],
+            'EPUB' => [
+                'mime' => 'application/epub+zip',
+                'extensions' => ['epub'],
+                'extension' => 'epub',
             ],
             'ZIP' => [
                 'mime' => 'application/zip',
@@ -216,6 +426,11 @@ final class MimeTypeDefinitions
                 'extensions' => ['7z'],
                 'extension' => '7z',
             ],
+            'XZ' => [
+                'mime' => 'application/x-xz',
+                'extensions' => ['xz'],
+                'extension' => 'xz',
+            ],
             'DOC' => [
                 'mime' => 'application/msword',
                 'extensions' => ['doc'],
@@ -225,6 +440,26 @@ final class MimeTypeDefinitions
                 'mime' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                 'extensions' => ['docx'],
                 'extension' => 'docx',
+            ],
+            'DOCM' => [
+                'mime' => 'application/vnd.ms-word.document.macroenabled.12',
+                'extensions' => ['docm'],
+                'extension' => 'docm',
+            ],
+            'DOT' => [
+                'mime' => 'application/msword',
+                'extensions' => ['dot'],
+                'extension' => 'dot',
+            ],
+            'DOTX' => [
+                'mime' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.template',
+                'extensions' => ['dotx'],
+                'extension' => 'dotx',
+            ],
+            'DOTM' => [
+                'mime' => 'application/vnd.ms-word.template.macroenabled.12',
+                'extensions' => ['dotm'],
+                'extension' => 'dotm',
             ],
             'XLS' => [
                 'mime' => 'application/vnd.ms-excel',
@@ -236,6 +471,31 @@ final class MimeTypeDefinitions
                 'extensions' => ['xlsx'],
                 'extension' => 'xlsx',
             ],
+            'XLSM' => [
+                'mime' => 'application/vnd.ms-excel.sheet.macroenabled.12',
+                'extensions' => ['xlsm'],
+                'extension' => 'xlsm',
+            ],
+            'XLT' => [
+                'mime' => 'application/vnd.ms-excel',
+                'extensions' => ['xlt'],
+                'extension' => 'xlt',
+            ],
+            'XLTX' => [
+                'mime' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.template',
+                'extensions' => ['xltx'],
+                'extension' => 'xltx',
+            ],
+            'XLTM' => [
+                'mime' => 'application/vnd.ms-excel.template.macroenabled.12',
+                'extensions' => ['xltm'],
+                'extension' => 'xltm',
+            ],
+            'XLSB' => [
+                'mime' => 'application/vnd.ms-excel.sheet.binary.macroenabled.12',
+                'extensions' => ['xlsb'],
+                'extension' => 'xlsb',
+            ],
             'PPT' => [
                 'mime' => 'application/vnd.ms-powerpoint',
                 'extensions' => ['ppt'],
@@ -245,6 +505,151 @@ final class MimeTypeDefinitions
                 'mime' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
                 'extensions' => ['pptx'],
                 'extension' => 'pptx',
+            ],
+            'PPTM' => [
+                'mime' => 'application/vnd.ms-powerpoint.presentation.macroenabled.12',
+                'extensions' => ['pptm'],
+                'extension' => 'pptm',
+            ],
+            'POT' => [
+                'mime' => 'application/vnd.ms-powerpoint',
+                'extensions' => ['pot'],
+                'extension' => 'pot',
+            ],
+            'POTX' => [
+                'mime' => 'application/vnd.openxmlformats-officedocument.presentationml.template',
+                'extensions' => ['potx'],
+                'extension' => 'potx',
+            ],
+            'POTM' => [
+                'mime' => 'application/vnd.ms-powerpoint.template.macroenabled.12',
+                'extensions' => ['potm'],
+                'extension' => 'potm',
+            ],
+            'PPS' => [
+                'mime' => 'application/vnd.ms-powerpoint',
+                'extensions' => ['pps'],
+                'extension' => 'pps',
+            ],
+            'PPSX' => [
+                'mime' => 'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+                'extensions' => ['ppsx'],
+                'extension' => 'ppsx',
+            ],
+            'PPSM' => [
+                'mime' => 'application/vnd.ms-powerpoint.slideshow.macroenabled.12',
+                'extensions' => ['ppsm'],
+                'extension' => 'ppsm',
+            ],
+            'VSD' => [
+                'mime' => 'application/vnd.visio',
+                'extensions' => ['vsd'],
+                'extension' => 'vsd',
+            ],
+            'VSDX' => [
+                'mime' => 'application/vnd.ms-visio.drawing',
+                'extensions' => ['vsdx'],
+                'extension' => 'vsdx',
+            ],
+            'ODT' => [
+                'mime' => 'application/vnd.oasis.opendocument.text',
+                'extensions' => ['odt'],
+                'extension' => 'odt',
+            ],
+            'OTT' => [
+                'mime' => 'application/vnd.oasis.opendocument.text-template',
+                'extensions' => ['ott'],
+                'extension' => 'ott',
+            ],
+            'ODM' => [
+                'mime' => 'application/vnd.oasis.opendocument.text-master',
+                'extensions' => ['odm'],
+                'extension' => 'odm',
+            ],
+            'OTH' => [
+                'mime' => 'application/vnd.oasis.opendocument.text-web',
+                'extensions' => ['oth'],
+                'extension' => 'oth',
+            ],
+            'ODS' => [
+                'mime' => 'application/vnd.oasis.opendocument.spreadsheet',
+                'extensions' => ['ods'],
+                'extension' => 'ods',
+            ],
+            'OTS' => [
+                'mime' => 'application/vnd.oasis.opendocument.spreadsheet-template',
+                'extensions' => ['ots'],
+                'extension' => 'ots',
+            ],
+            'ODP' => [
+                'mime' => 'application/vnd.oasis.opendocument.presentation',
+                'extensions' => ['odp'],
+                'extension' => 'odp',
+            ],
+            'OTP' => [
+                'mime' => 'application/vnd.oasis.opendocument.presentation-template',
+                'extensions' => ['otp'],
+                'extension' => 'otp',
+            ],
+            'ODG' => [
+                'mime' => 'application/vnd.oasis.opendocument.graphics',
+                'extensions' => ['odg'],
+                'extension' => 'odg',
+            ],
+            'OTG' => [
+                'mime' => 'application/vnd.oasis.opendocument.graphics-template',
+                'extensions' => ['otg'],
+                'extension' => 'otg',
+            ],
+            'ODF' => [
+                'mime' => 'application/vnd.oasis.opendocument.formula',
+                'extensions' => ['odf'],
+                'extension' => 'odf',
+            ],
+            'ODB' => [
+                'mime' => 'application/vnd.oasis.opendocument.database',
+                'extensions' => ['odb'],
+                'extension' => 'odb',
+            ],
+            'SXW' => [
+                'mime' => 'application/vnd.sun.xml.writer',
+                'extensions' => ['sxw'],
+                'extension' => 'sxw',
+            ],
+            'STW' => [
+                'mime' => 'application/vnd.sun.xml.writer.template',
+                'extensions' => ['stw'],
+                'extension' => 'stw',
+            ],
+            'SXC' => [
+                'mime' => 'application/vnd.sun.xml.calc',
+                'extensions' => ['sxc'],
+                'extension' => 'sxc',
+            ],
+            'STC' => [
+                'mime' => 'application/vnd.sun.xml.calc.template',
+                'extensions' => ['stc'],
+                'extension' => 'stc',
+            ],
+            'SXI' => [
+                'mime' => 'application/vnd.sun.xml.impress',
+                'extensions' => ['sxi'],
+                'extension' => 'sxi',
+            ],
+            'STI' => [
+                'mime' => 'application/vnd.sun.xml.impress.template',
+                'extensions' => ['sti'],
+                'extension' => 'sti',
+            ],
+            'SXD' => [
+                'mime' => 'application/vnd.sun.xml.draw',
+                'extensions' => ['sxd'],
+                'extension' => 'sxd',
+            ],
+            'SXM' => [
+                'mime' => 'application/vnd.sun.xml.math',
+                'extensions' => ['sxm'],
+                'extension' => 'sxm',
             ],
             'MP3' => [
                 'mime' => 'audio/mpeg',
@@ -276,6 +681,11 @@ final class MimeTypeDefinitions
                 'extensions' => ['flac'],
                 'extension' => 'flac',
             ],
+            'OPUS' => [
+                'mime' => 'audio/opus',
+                'extensions' => ['opus'],
+                'extension' => 'opus',
+            ],
             'MP4' => [
                 'mime' => 'video/mp4',
                 'extensions' => ['mp4'],
@@ -305,6 +715,11 @@ final class MimeTypeDefinitions
                 'mime' => 'video/mpeg',
                 'extensions' => ['mpeg', 'mpg'],
                 'extension' => 'mpg',
+            ],
+            'M4V' => [
+                'mime' => 'video/x-m4v',
+                'extensions' => ['m4v'],
+                'extension' => 'm4v',
             ],
             'WOFF' => [
                 'mime' => 'font/woff',
